@@ -42,12 +42,12 @@ const PrismScene = (() => {
 
     /* ── the word, in-scene so the glass can bend it ───────── */
     const wc = document.createElement("canvas");
-    wc.width = 2048; wc.height = 512;
+    wc.width = 2048; wc.height = 640;
     wordCtx = wc.getContext("2d");
     wordTex = new THREE.CanvasTexture(wc);
     wordTex.anisotropy = 4;
     wordPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(5.15, 1.29),
+      new THREE.PlaneGeometry(5.42, 5.42 * 640 / 2048),
       new THREE.MeshBasicMaterial({ map: wordTex, transparent: true, toneMapped: false })
     );
     wordPlane.position.set(0, 0.02, -1.7);
@@ -77,27 +77,26 @@ const PrismScene = (() => {
     const noiseTex = new THREE.CanvasTexture(nc);
     noiseTex.wrapS = noiseTex.wrapT = THREE.RepeatWrapping;
 
+    // clear optical glass: fully see-through, refracts and
+    // magnifies whatever sits behind it
     const glass = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       transmission: 1,
-      thickness: 2.2,
-      roughness: 0.12,
-      roughnessMap: noiseTex,
-      bumpMap: noiseTex,
-      bumpScale: 0.012,
+      thickness: 1.3,
+      roughness: 0.05,
       metalness: 0,
-      ior: 1.5,
+      ior: 1.52,
       envMap: env,
-      envMapIntensity: 2.2,
+      envMapIntensity: 1.6,
       clearcoat: 1,
-      clearcoatRoughness: 0.08,
-      iridescence: 1,
+      clearcoatRoughness: 0.05,
+      iridescence: 0.5,
       iridescenceIOR: 1.6,
-      attenuationColor: new THREE.Color(0xcfd8ff),
-      attenuationDistance: 4.5,
+      attenuationColor: new THREE.Color(0xe6ecff),
+      attenuationDistance: 9,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.96,   // insurance: letters read through even on weak renderers
+      opacity: 0.88,   // guaranteed see-through on every renderer
     });
     prism = new THREE.Mesh(geo, glass);
     prismGroup.add(prism);
@@ -145,45 +144,72 @@ const PrismScene = (() => {
       });
       if (pr.image) new THREE.TextureLoader().load(pr.image, (t) => { mat.map = t; mat.needsUpdate = true; });
       const p = new THREE.Mesh(bg, mat);
-      p.userData.idx = i;
+      p.userData.slot = i;
       ring.add(p);
       panels.push(p);
     });
 
+    // the word WORKS revolves around the prism, one slot ahead
+    const wt = document.createElement("canvas");
+    wt.width = 2048; wt.height = 512;
+    const wx = wt.getContext("2d");
+    wx.font = "800 340px Archivo, Arial, sans-serif";
+    const ww = wx.measureText("WORKS").width;
+    wx.shadowColor = "rgba(210,220,255,0.85)";
+    wx.shadowBlur = 70;
+    wx.fillStyle = "#ffffff";
+    wx.fillText("WORKS", (2048 - ww) / 2, 380);
+    const wpGeo = new THREE.PlaneGeometry(6.6, 6.6 * 512 / 2048, 32, 1);
+    const wpos2 = wpGeo.attributes.position;
+    for (let i = 0; i < wpos2.count; i++) {
+      const px = wpos2.getX(i);
+      wpos2.setZ(i, -(px * px) * 0.05);
+    }
+    const worksPanel = new THREE.Mesh(wpGeo, new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(wt), transparent: true, opacity: 0, toneMapped: false,
+    }));
+    worksPanel.userData.slot = -1;
+    ring.add(worksPanel);
+    panels.push(worksPanel);
+
     return prismGroup;
   }
 
-  /* redraw the word only when the morph state changes */
+  /* redraw the word only when the morph state changes.
+     KAVYA fills the full canvas width; on scroll it dissolves
+     and hands over to the revolving WORKS panel on the ring. */
   function drawWord(m, fade) {
     if (Math.abs(m - lastM) < 0.004 && Math.abs(fade - lastF) < 0.004) return;
     lastM = m; lastF = fade;
     const x = wordCtx;
-    x.clearRect(0, 0, 2048, 512);
-    const draw = (word, out) => {
-      x.font = "800 330px Archivo, Arial, sans-serif";
-      const widths = word.split("").map((ch) => x.measureText(ch).width);
-      const spacing = 34;
-      const total = widths.reduce((a, b) => a + b, 0) + spacing * (word.length - 1);
-      let cx = (2048 - total) / 2;
-      word.split("").forEach((ch, i) => {
-        const d = i * 0.07;
-        const k = Math.max(0, Math.min(1, m * 1.6 - d));
-        const a = (out ? 1 - k : k) * fade;
-        if (a > 0.01) {
-          x.save();
-          x.globalAlpha = a;
-          x.filter = `blur(${(out ? k : 1 - k) * 10}px)`;
-          x.shadowColor = "rgba(210,220,255,0.9)";
-          x.shadowBlur = 46;
-          x.fillStyle = "#ffffff";
-          x.fillText(ch, cx, 388 + (out ? -k : 1 - k) * 52);
-          x.restore();
-        }
-        cx += widths[i] + spacing;
-      });
-    };
-    draw("KAVYA", true);
-    if (m > 0.01) draw("WORK", false);
+    x.clearRect(0, 0, 2048, 640);
+    const word = "KAVYA";
+    x.font = "800 300px Archivo, Arial, sans-serif";
+    let widths = word.split("").map((ch) => x.measureText(ch).width);
+    let total = widths.reduce((a, b) => a + b, 0) + 40 * (word.length - 1);
+    const fit = 1960 / total;
+    const fontPx = Math.floor(300 * fit), spacing = 40 * fit;
+    x.font = `800 ${fontPx}px Archivo, Arial, sans-serif`;
+    widths = word.split("").map((ch) => x.measureText(ch).width);
+    total = widths.reduce((a, b) => a + b, 0) + spacing * (word.length - 1);
+    let cx = (2048 - total) / 2;
+    const baseY = 320 + fontPx * 0.36;
+    word.split("").forEach((ch, i) => {
+      const d = i * 0.07;
+      const k = Math.max(0, Math.min(1, m * 1.6 - d));
+      const a = (1 - k) * fade;
+      if (a > 0.01) {
+        x.save();
+        x.globalAlpha = a;
+        x.filter = `blur(${k * 10}px)`;
+        x.shadowColor = "rgba(210,220,255,0.9)";
+        x.shadowBlur = 60;
+        x.fillStyle = "#ffffff";
+        x.fillText(ch, cx, baseY - k * 60);
+        x.restore();
+      }
+      cx += widths[i] + spacing;
+    });
     wordTex.needsUpdate = true;
   }
   function setWordVisible(v) { wordPlane.visible = v; }
@@ -192,8 +218,8 @@ const PrismScene = (() => {
   function setRing(angle, k) {
     ring.visible = k > 0.02;
     if (!ring.visible) return;
-    panels.forEach((p, i) => {
-      const a = i * RSTEP + angle;
+    panels.forEach((p) => {
+      const a = p.userData.slot * RSTEP + angle;
       p.position.set(Math.sin(a) * RRAD, Math.sin(a * 2) * 0.04, Math.cos(a) * RRAD);
       p.rotation.y = a;
       const facing = Math.max(0, Math.cos(a));

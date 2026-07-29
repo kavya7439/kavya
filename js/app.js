@@ -310,7 +310,7 @@
         genuinely refracts and magnifies the letters ─────────── */
   function morph(p) {
     const m = ease(seg(p, 0.08, 0.15));
-    const heroFade = 1 - ease(seg(p, 0.16, 0.20));
+    const heroFade = 1 - ease(seg(p, 0.105, 0.155));
     PrismScene.drawWord(m, heroFade);
     PrismScene.setWordVisible(heroFade > 0.01);
     $("#worksub").style.opacity = m * heroFade;
@@ -353,10 +353,10 @@
     const act = resolveAct(pS);
     setAct(act, pS);
 
-    // the project globe: scroll spins the ring of screens
-    const ringK = Math.min(ease(seg(pS, 0.145, 0.185)), 1 - ease(seg(pS, 0.52, 0.56)));
-    // continuous index: panel i rests centred at its act's centre
-    const ci = seg(pS, 0.16, 0.52) * 4 - 0.5;
+    // the project globe: WORKS revolves in first (slot -1),
+    // then each project rests centred at its act's centre
+    const ringK = Math.min(ease(seg(pS, 0.085, 0.125)), 1 - ease(seg(pS, 0.52, 0.56)));
+    const ci = Math.max(-1.7, Math.min(3.6, (pS - 0.205) / 0.09));
     PrismScene.setRing(-ci * 1.3, mobile ? ringK * 0.85 : ringK);
 
     // engine HUD: live quaternion + axis gizmo
