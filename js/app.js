@@ -1,0 +1,296 @@
+/* ============================================================
+   app.js — renderer, scroll film, cursor light, morphing type,
+   acts, accessibility, fallback
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const fmt = (s = "") => String(s).replace(/\[(ADD|CONFIRM)[^\]]*\]/g, (m) => `<span class="ph">${m}</span>`);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const mobile = matchMedia("(max-width: 760px)").matches;
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const seg = (p, a, b) => clamp01((p - a) / (b - a));
+  const ease = (t) => t * t * (3 - 2 * t);
+
+  /* ── acts ─────────────────────────────────────────────────── */
+  const ACTS = [
+    { key: "hero", from: 0.00, to: 0.08 },
+    { key: "morph", from: 0.08, to: 0.16 },
+    { key: "w0", from: 0.16, to: 0.25, project: 0 },
+    { key: "w1", from: 0.25, to: 0.34, project: 1 },
+    { key: "w2", from: 0.34, to: 0.43, project: 2 },
+    { key: "w3", from: 0.43, to: 0.52, project: 3 },
+    { key: "philosophy", from: 0.52, to: 0.60 },
+    { key: "about", from: 0.60, to: 0.68 },
+    { key: "process", from: 0.68, to: 0.78 },
+    { key: "achieve", from: 0.78, to: 0.86 },
+    { key: "cta", from: 0.86, to: 0.94 },
+    { key: "footer", from: 0.94, to: 1.001 },
+  ];
+  const NAMES = {
+    hero: "Kavya", morph: "Work", w0: "Work 01", w1: "Work 02", w2: "Work 03", w3: "Work 04",
+    philosophy: "Philosophy", about: "About", process: "Process", achieve: "Achievements",
+    cta: "Contact", footer: "Kavya",
+  };
+  const resolveAct = (p) => ACTS.find((a) => p >= a.from && p < a.to) || ACTS[ACTS.length - 1];
+
+  /* keyframe track helper */
+  function track(keys, p) {
+    if (p <= keys[0][0]) return keys[0][1];
+    for (let i = 0; i < keys.length - 1; i++) {
+      const [pa, va] = keys[i], [pb, vb] = keys[i + 1];
+      if (p <= pb) return va + (vb - va) * ease(seg(p, pa, pb));
+    }
+    return keys[keys.length - 1][1];
+  }
+  // prism position x, scale, y across the whole journey
+  const PX = [[0, 0], [0.16, 0], [0.20, 2.1], [0.50, 2.1], [0.545, 0], [0.60, 0], [0.63, -2.2], [0.67, -2.2], [0.71, 0], [0.80, 2.2], [0.845, 2.2], [0.88, 0], [1, 0]];
+  const PSC = [[0, 1], [0.10, 1], [0.18, 0.72], [0.50, 0.72], [0.56, 1.05], [0.62, 0.55], [0.70, 0.9], [0.80, 0.5], [0.87, 0.62], [0.95, 0.5], [1, 0.5]];
+  const PYY = [[0, 0], [0.86, 0], [0.90, 0.35], [0.94, 0.55], [1, 0.7]];
+
+  /* ── DOM build ────────────────────────────────────────────── */
+  function chars(word, gapAfter) {
+    return word.split("").map((c, i) =>
+      `<span class="ch" data-i="${i + (gapAfter ? 0 : 3)}">${c}</span>`).join("");
+  }
+
+  function buildDOM() {
+    $("#w-kavya .l").innerHTML = chars("KA");
+    $("#w-kavya .r").innerHTML = chars("YA", false);
+    $("#w-work .l").innerHTML = chars("WO");
+    $("#w-work .r").innerHTML = chars("RK", false);
+    $("#tagline").textContent = DATA.hero.tagline;
+    $("#cueword").textContent = DATA.hero.cue;
+    $("#worksub").textContent = DATA.work.sub;
+
+    // project acts
+    const wrap = $("#pcards");
+    DATA.projects.forEach((pr, i) => {
+      const card = document.createElement("article");
+      card.className = "pcard";
+      card.dataset.idx = i;
+      card.innerHTML = `
+        <span class="ghost" aria-hidden="true">${pr.num}</span>
+        <div class="pframe" style="--pa:${pr.accent};${pr.image ? `background-image:url('${pr.image}')` : ""}">
+          ${pr.image ? "" : '<span class="pframe-note mono">[ADD PROJECT IMAGE]</span>'}
+        </div>
+        <div class="pmeta">
+          <span class="mono pnum">${pr.num} / 0${DATA.projects.length}</span>
+          <h2>${pr.title}</h2>
+          <p class="pcat mono">${pr.category}</p>
+          <p class="pdesc">${fmt(pr.desc)}</p>
+          <div class="plinks">${pr.links.map((l) => `<a class="lnk" href="${l.href}" target="_blank" rel="noopener">${l.label} ↗</a>`).join("")}</div>
+        </div>`;
+      wrap.appendChild(card);
+    });
+
+    $("#philo .big-serif").textContent = DATA.philosophy.line;
+    $("#philo .sub").textContent = DATA.philosophy.sub;
+    $("#about h2").textContent = DATA.about.name;
+    $("#about .meta").textContent = DATA.about.meta;
+    $("#about .lines").innerHTML = DATA.about.lines.map((l) => `<p>${fmt(l)}</p>`).join("");
+    $("#process .pwords").innerHTML = DATA.process.map((w, i) => `<span class="pw" style="--d:${i * 90}ms">${w}</span>`).join("");
+    $("#process .sub").textContent = DATA.processLine;
+    $("#achieve .rows").innerHTML = DATA.achievements.map((a) =>
+      `<div class="arow"><span class="an">${fmt(a.n)}</span><span class="al">${fmt(a.label)}</span></div>`).join("");
+    $("#cta h2").textContent = DATA.cta.line;
+    $("#cta .sub").textContent = DATA.cta.sub;
+    $("#cta .mail").textContent = DATA.profile.email;
+    $("#cta .mail").href = `mailto:${DATA.profile.email}?subject=${encodeURIComponent("Let's build something beautiful")}`;
+    $("#footer .final").textContent = DATA.footer.line;
+    $$("#footer [data-mail]").forEach((a) => (a.href = `mailto:${DATA.profile.email}`));
+    $$("#footer [data-li]").forEach((a) => (a.href = DATA.profile.linkedin));
+    $$("#footer [data-gh]").forEach((a) => (a.href = DATA.profile.github));
+
+    // accessible document
+    $("#doc").innerHTML = `
+      <h1>Kavya Bahety. ${DATA.hero.tagline}</h1>
+      <p>${DATA.about.lines.join(" ")}</p>
+      ${DATA.projects.map((pr) => `
+        <article><h2>${pr.num} · ${pr.title}</h2><p>${pr.category}</p><p>${pr.desc}</p>
+        ${pr.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join(" · ")}</article>`).join("")}
+      <h2>Process</h2><p>${DATA.process.join(" → ")}. ${DATA.processLine}</p>
+      <h2 id="doc-contact">${DATA.cta.line}</h2>
+      <p><a href="mailto:${DATA.profile.email}">${DATA.profile.email}</a> ·
+         <a href="${DATA.profile.linkedin}">LinkedIn</a> · <a href="${DATA.profile.github}">GitHub</a></p>`;
+  }
+
+  /* ── boot ─────────────────────────────────────────────────── */
+  buildDOM();
+  const canvas = $("#stage");
+  let gl = null;
+  try { gl = canvas.getContext("webgl2") || canvas.getContext("webgl"); } catch { /* no-op */ }
+  if (!gl || !window.THREE) {
+    document.body.classList.add("fallback");
+    $("#loader").classList.add("done");
+    return;
+  }
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.5 : 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+  cam.position.set(0, 0, 7.2);
+
+  scene.add(new THREE.HemisphereLight(0xaebbdd, 0x0a0a10, 0.5));
+  const key = new THREE.DirectionalLight(0xffffff, 1.2); key.position.set(3, 5, 4); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x5f7bd8, 0.8); rim.position.set(-5, -2, -4); scene.add(rim);
+
+  const prismGroup = PrismScene.build(scene, renderer);
+
+  /* ── cursor: light bend + liquid type + prism tilt ────────── */
+  let mx = 0, my = 0, vx = 0, lastX = 0, dispScale = 0;
+  const light = $("#cursorlight");
+  addEventListener("pointermove", (e) => {
+    mx = (e.clientX / innerWidth) * 2 - 1;
+    my = (e.clientY / innerHeight) * 2 - 1;
+    vx = Math.abs(e.clientX - lastX); lastX = e.clientX;
+    dispScale = Math.min(26, dispScale + vx * 0.35);
+    if (light) light.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+  }, { passive: true });
+  addEventListener("click", (e) => {
+    if (reduced || e.target.closest("a, button")) return;
+    const r = document.createElement("i");
+    r.className = "ripple";
+    r.style.left = e.clientX + "px"; r.style.top = e.clientY + "px";
+    document.body.appendChild(r);
+    setTimeout(() => r.remove(), 900);
+  });
+
+  /* ── act state → DOM ──────────────────────────────────────── */
+  let currentKey = null;
+  function setAct(a, p) {
+    if (a.key !== currentKey) {
+      currentKey = a.key;
+      document.body.dataset.act = a.key;
+      $("#actname").textContent = NAMES[a.key];
+      $("#sr-live").textContent = NAMES[a.key];
+    }
+    $("#progress i").style.height = (p * 100).toFixed(1) + "%";
+    // active project card
+    if (a.project != null) {
+      $$(".pcard").forEach((c) => c.classList.toggle("on", +c.dataset.idx === a.project));
+    } else {
+      $$(".pcard").forEach((c) => c.classList.remove("on"));
+    }
+  }
+
+  /* ── morph KAVYA → WORK, scrubbed per letter ──────────────── */
+  const kChars = $$("#w-kavya .ch"), wChars = $$("#w-work .ch");
+  function morph(p) {
+    const m = ease(seg(p, 0.08, 0.15));
+    const heroFade = 1 - ease(seg(p, 0.16, 0.20));
+    kChars.forEach((c) => {
+      const d = +c.dataset.i * 0.06;
+      const k = clamp01(m * 1.6 - d);
+      c.style.opacity = (1 - k) * heroFade;
+      c.style.transform = `translateY(${-k * 60}px)`;
+      c.style.filter = `blur(${k * 14}px)`;
+    });
+    wChars.forEach((c) => {
+      const d = +c.dataset.i * 0.06;
+      const k = clamp01(m * 1.6 - d);
+      c.style.opacity = k * heroFade;
+      c.style.transform = `translateY(${(1 - k) * 60}px)`;
+      c.style.filter = `blur(${(1 - k) * 14}px)`;
+    });
+    $("#big").style.opacity = p > 0.24 ? 0 : 1;
+    $("#worksub").style.opacity = m * heroFade;
+  }
+
+  /* ── loop ─────────────────────────────────────────────────── */
+  let pS = 0, t = 0, lastT = performance.now();
+  function progress() {
+    const doc = document.body.scrollHeight - innerHeight;
+    return doc > 0 ? clamp01(scrollY / doc) : 0;
+  }
+
+  function frame() {
+    requestAnimationFrame(frame);
+    if (document.hidden) { lastT = performance.now(); return; }
+    const now = performance.now();
+    const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now;
+    t += dt;
+
+    pS += (progress() - pS) * (reduced ? 1 : 1 - Math.exp(-6.5 * dt));
+
+    // prism choreography: it never disappears, it travels
+    const g = prismGroup;
+    g.position.x = (mobile ? 0 : track(PX, pS));
+    g.position.y = track(PYY, pS) + Math.sin(t * 0.8) * 0.06;
+    g.scale.setScalar(track(PSC, pS) * (mobile ? 0.78 : 1));
+    g.rotation.y = t * 0.22 + pS * 5.2 + mx * 0.18;
+    g.rotation.x = 0.12 + my * 0.12 + Math.sin(t * 0.5) * 0.03;
+
+    // fragments during the process act
+    const split = Math.sin(ease(seg(pS, 0.68, 0.72)) * Math.PI / 2) * (1 - ease(seg(pS, 0.745, 0.78)));
+    PrismScene.setSplit(reduced ? 0 : split, t);
+
+    morph(pS);
+    setAct(resolveAct(pS), pS);
+
+    // liquid type decay
+    dispScale *= Math.exp(-3 * dt);
+    if (!reduced) $("#liquid feDisplacementMap")?.setAttribute("scale", dispScale.toFixed(1));
+
+    renderer.render(scene, cam);
+  }
+
+  /* ── act snapping: settle on clean states ─────────────────── */
+  const CENTERS = ACTS.map((a) => (a.from + a.to) / 2);
+  let idleTimer = null, snapRAF = null;
+  function tweenScrollTo(p) {
+    cancelAnimationFrame(snapRAF);
+    const doc = document.body.scrollHeight - innerHeight;
+    const from = scrollY, to = p * doc, t0 = performance.now();
+    const dur = Math.min(700, 240 + Math.abs(to - from) * 0.35);
+    (function step(now) {
+      const k = Math.min(1, (now - t0) / dur);
+      scrollTo(0, from + (to - from) * (k * k * (3 - 2 * k)));
+      if (k < 1) snapRAF = requestAnimationFrame(step);
+    })(t0);
+  }
+  ["wheel", "touchstart", "keydown"].forEach((ev) =>
+    addEventListener(ev, () => cancelAnimationFrame(snapRAF), { passive: true }));
+  addEventListener("scroll", () => {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if (reduced) return;
+      const p = progress();
+      let best = CENTERS[0];
+      for (const c of CENTERS) if (Math.abs(c - p) < Math.abs(best - p)) best = c;
+      if (Math.abs(best - p) > 0.004 && Math.abs(best - p) < 0.05) tweenScrollTo(best);
+    }, 190);
+  }, { passive: true });
+
+  /* keyboard: arrows step acts */
+  addEventListener("keydown", (e) => {
+    if (e.target.closest("input, textarea")) return;
+    const idx = ACTS.indexOf(resolveAct(progress()));
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); tweenScrollTo(CENTERS[Math.min(ACTS.length - 1, idx + 1)]); }
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); tweenScrollTo(CENTERS[Math.max(0, idx - 1)]); }
+  });
+
+  /* nav jumps */
+  $$("[data-jump]").forEach((a) => a.addEventListener("click", (e) => {
+    e.preventDefault();
+    tweenScrollTo(+a.dataset.jump);
+  }));
+
+  function resize() {
+    renderer.setSize(innerWidth, innerHeight);
+    cam.aspect = innerWidth / innerHeight;
+    cam.updateProjectionMatrix();
+  }
+  addEventListener("resize", resize);
+  resize();
+  frame();
+  setTimeout(() => $("#loader").classList.add("done"), reduced ? 50 : 900);
+
+  console.log("%cCreating experiences that are remembered.", "color:#9fb4e8;font-weight:bold");
+  console.log("Say hi: " + DATA.profile.email);
+})();

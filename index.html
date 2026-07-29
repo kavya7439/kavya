@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAVYA — Creating experiences that are remembered</title>
+  <meta name="description" content="Kavya Bahety. An immersive portfolio built around a glass prism: selected work, philosophy, process and contact.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;500;800&family=IBM+Plex+Mono:wght@400&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 6 L28 6 L16 28 Z' fill='none' stroke='%23AEBBDD' stroke-width='2'/%3E%3C/svg%3E">
+  <meta property="og:title" content="KAVYA — the prism">
+  <meta property="og:description" content="Creating experiences that are remembered long after they're seen.">
+  <meta property="og:image" content="https://kavya7439.github.io/kavya/assets/og.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <!-- liquid typography filter -->
+  <svg width="0" height="0" aria-hidden="true">
+    <filter id="liquid"><feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="1" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="0"/></filter>
+  </svg>
+
+  <div id="loader" aria-hidden="true"><span class="tri"></span></div>
+
+  <!-- blueprint scaffold -->
+  <svg id="scaffold" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <line x1="420" y1="-40" x2="1020" y2="940" />
+    <line x1="1020" y1="-40" x2="420" y2="940" />
+    <line x1="0" y1="450" x2="1440" y2="450" />
+    <line x1="720" y1="0" x2="720" y2="900" class="dash" />
+    <circle cx="720" cy="450" r="285" class="dash" />
+    <circle cx="720" cy="450" r="170" class="dash" />
+  </svg>
+
+  <main id="runway" aria-hidden="true"></main>
+
+  <div id="pin" aria-hidden="true">
+    <canvas id="stage"></canvas>
+
+    <!-- the word: KAVYA morphs into WORK, the prism is the V -->
+    <h1 id="big">
+      <span id="w-kavya" class="word"><span class="l"></span><span class="vgap"></span><span class="r"></span></span>
+      <span id="w-work" class="word"><span class="l"></span><span class="vgap"></span><span class="r"></span></span>
+    </h1>
+    <p id="tagline" class="mono"></p>
+    <p id="worksub" class="mono"></p>
+    <div id="cue"><i></i><span id="cueword" class="mono"></span></div>
+
+    <!-- projects -->
+    <div id="pcards"></div>
+
+    <!-- philosophy -->
+    <section class="act" id="philo"><p class="big-serif"></p><p class="sub"></p></section>
+
+    <!-- about -->
+    <section class="act side" id="about"><h2></h2><p class="meta mono"></p><div class="lines"></div></section>
+
+    <!-- process -->
+    <section class="act" id="process"><div class="pwords"></div><p class="sub"></p></section>
+
+    <!-- achievements -->
+    <section class="act side" id="achieve"><p class="mono actlabel">Verified</p><div class="rows"></div></section>
+
+    <!-- cta -->
+    <section class="act" id="cta">
+      <h2></h2><p class="sub"></p>
+      <a class="mail" href="#"></a>
+    </section>
+
+    <!-- footer -->
+    <section class="act" id="footer">
+      <p class="wordmark">KA<span class="tri-inline" aria-hidden="true"></span>YA</p>
+      <p class="final serif"></p>
+      <nav class="flinks">
+        <a data-mail href="#">Email</a>
+        <a data-li href="#" target="_blank" rel="noopener">LinkedIn</a>
+        <a data-gh href="#" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <p class="mono fmeta">Kolkata, India · Built with AI, directed by Kavya</p>
+    </section>
+  </div>
+
+  <!-- chrome -->
+  <header id="brand" class="mono">KA<span class="tri-inline small" aria-hidden="true"></span>YA</header>
+  <nav id="topnav" class="mono" aria-label="Navigation">
+    <a href="#" data-jump="0.205">Work</a>
+    <a href="#" data-jump="0.64">About</a>
+    <a href="#" data-jump="0.90">Contact</a>
+  </nav>
+  <div id="progress" aria-hidden="true"><i></i></div>
+  <span id="actname" class="mono" aria-hidden="true"></span>
+  <div id="cursorlight" aria-hidden="true"></div>
+
+  <p id="sr-live" class="sr-only" aria-live="polite"></p>
+  <article id="doc" class="sr-only-until-fallback"></article>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
