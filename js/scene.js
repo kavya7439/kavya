@@ -1,18 +1,20 @@
 /* ============================================================
-   scene.js — the glass prism
+   scene.js — glass prism, WebGL word, project ring
    ============================================================
-   An inverted triangular prism in real transmissive glass,
-   with a blueprint wireframe echo and three fragments that
-   split off and reform. Environment map is generated
-   procedurally, so the glass has something to refract.
+   The word KAVYA lives inside WebGL as a glowing texture
+   plane BEHIND the prism, so the transmissive glass really
+   refracts and magnifies the letters through it.
+   Projects sit on a rotating ring of curved screens, like a
+   globe turning as you scroll. The prism never stops.
    ============================================================ */
 
 const PrismScene = (() => {
-  let scene, prismGroup, prism, wire, frags = [], envRT, stars, billboard, billMat;
+  let scene, prismGroup, prism, wire, frags = [], envRT, stars;
+  let wordTex, wordPlane, wordCtx, lastM = -1, lastF = -1;
+  let ring, panels = [];
+  const RSTEP = 1.3, RRAD = 6.4, RCZ = -6.8;
 
-  /* procedural studio environment: dark room, one white strip
-     light, one deep-blue wall, one silver bounce. This is what
-     the glass reflects and refracts. */
+  /* bright violet/blue studio the glass refracts */
   function makeEnv(renderer) {
     const envScene = new THREE.Scene();
     envScene.background = new THREE.Color(0x050507);
@@ -24,14 +26,13 @@ const PrismScene = (() => {
       m.position.set(...pos); m.rotation.set(...rot);
       envScene.add(m);
     };
-    mk(0xffffff, 16, 4, [0, 8, 0], [Math.PI / 2, 0, 0]);        // ceiling strip
-    mk(0x6a4fd8, 9, 11, [-9, 0, 0], [0, Math.PI / 2, 0]);       // violet wall
-    mk(0x3e5fbf, 9, 11, [9, 0, 0], [0, -Math.PI / 2, 0]);       // blue wall
-    mk(0xd9def0, 6, 7, [0, 0, -10], [0, 0, 0]);                 // bright back panel
-    mk(0x14141e, 30, 30, [0, -6, 0], [-Math.PI / 2, 0, 0]);     // floor
+    mk(0xffffff, 16, 4, [0, 8, 0], [Math.PI / 2, 0, 0]);
+    mk(0x6a4fd8, 9, 11, [-9, 0, 0], [0, Math.PI / 2, 0]);
+    mk(0x3e5fbf, 9, 11, [9, 0, 0], [0, -Math.PI / 2, 0]);
+    mk(0xd9def0, 6, 7, [0, 0, -10], [0, 0, 0]);
+    mk(0x14141e, 30, 30, [0, -6, 0], [-Math.PI / 2, 0, 0]);
     envRT = new THREE.WebGLCubeRenderTarget(256);
-    const cam = new THREE.CubeCamera(0.1, 100, envRT);
-    cam.update(renderer, envScene);
+    new THREE.CubeCamera(0.1, 100, envRT).update(renderer, envScene);
     return envRT.texture;
   }
 
@@ -39,13 +40,27 @@ const PrismScene = (() => {
     scene = parentScene;
     const env = makeEnv(renderer);
 
+    /* ── the word, in-scene so the glass can bend it ───────── */
+    const wc = document.createElement("canvas");
+    wc.width = 2048; wc.height = 512;
+    wordCtx = wc.getContext("2d");
+    wordTex = new THREE.CanvasTexture(wc);
+    wordTex.anisotropy = 4;
+    wordPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(5.15, 1.29),
+      new THREE.MeshBasicMaterial({ map: wordTex, transparent: true, toneMapped: false })
+    );
+    wordPlane.position.set(0, 0.02, -1.7);
+    scene.add(wordPlane);
+
+    /* ── prism group ───────────────────────────────────────── */
     prismGroup = new THREE.Group();
     scene.add(prismGroup);
 
-    // inverted triangular prism: wide triangular top, point down
     const geo = new THREE.CylinderGeometry(1.25, 0.02, 2.1, 3, 1).toNonIndexed();
     geo.computeVertexNormals();
-    // streaky frost: canvas noise drives roughness + bump
+
+    // streaky frost noise drives roughness + bump
     const nc = document.createElement("canvas");
     nc.width = nc.height = 256;
     const nx = nc.getContext("2d");
@@ -66,12 +81,12 @@ const PrismScene = (() => {
       color: 0xffffff,
       transmission: 1,
       thickness: 2.2,
-      roughness: 0.14,
+      roughness: 0.12,
       roughnessMap: noiseTex,
       bumpMap: noiseTex,
       bumpScale: 0.012,
       metalness: 0,
-      ior: 1.45,
+      ior: 1.5,
       envMap: env,
       envMapIntensity: 2.2,
       clearcoat: 1,
@@ -81,18 +96,18 @@ const PrismScene = (() => {
       attenuationColor: new THREE.Color(0xcfd8ff),
       attenuationDistance: 4.5,
       side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.96,   // insurance: letters read through even on weak renderers
     });
     prism = new THREE.Mesh(geo, glass);
     prismGroup.add(prism);
 
-    // blueprint echo: hairline edges, slightly larger
     wire = new THREE.LineSegments(
       new THREE.EdgesGeometry(new THREE.CylinderGeometry(1.32, 0.02, 2.2, 3, 1)),
-      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.16 })
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.14 })
     );
     prismGroup.add(wire);
 
-    // fragments: three small glass shards, hidden inside until the process act
     const fgeo = new THREE.TetrahedronGeometry(0.2);
     for (let i = 0; i < 3; i++) {
       const f = new THREE.Mesh(fgeo, glass.clone());
@@ -101,7 +116,7 @@ const PrismScene = (() => {
       frags.push(f);
     }
 
-    // faint star specks drifting in the room
+    /* ── star specks ───────────────────────────────────────── */
     const starGeo = new THREE.BufferGeometry();
     const pts = [];
     for (let i = 0; i < 220; i++) {
@@ -113,25 +128,79 @@ const PrismScene = (() => {
     }));
     scene.add(stars);
 
-    // curved project billboard (bent plane, like a wall screen)
-    const bg = new THREE.PlaneGeometry(5.4, 3.1, 32, 1);
-    const pos = bg.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i);
-      pos.setZ(i, -(x * x) * 0.055);
+    /* ── project ring: a globe of curved screens ───────────── */
+    ring = new THREE.Group();
+    ring.position.set(0.9, 0.05, RCZ);
+    scene.add(ring);
+    const bg = new THREE.PlaneGeometry(3.55, 2.06, 32, 1);
+    const bpos = bg.attributes.position;
+    for (let i = 0; i < bpos.count; i++) {
+      const x = bpos.getX(i);
+      bpos.setZ(i, -(x * x) * 0.05);
     }
     bg.computeVertexNormals();
-    billMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, toneMapped: false });
-    billboard = new THREE.Mesh(bg, billMat);
-    billboard.position.set(1.55, 0.1, -0.6);
-    billboard.rotation.y = -0.22;
-    scene.add(billboard);
+    DATA.projects.forEach((pr, i) => {
+      const mat = new THREE.MeshBasicMaterial({
+        map: projectTexture(pr), transparent: true, opacity: 0, toneMapped: false,
+      });
+      if (pr.image) new THREE.TextureLoader().load(pr.image, (t) => { mat.map = t; mat.needsUpdate = true; });
+      const p = new THREE.Mesh(bg, mat);
+      p.userData.idx = i;
+      ring.add(p);
+      panels.push(p);
+    });
 
     return prismGroup;
   }
 
-  /* generative billboard art per project (replaced by a real
-     image texture automatically when data.image is set) */
+  /* redraw the word only when the morph state changes */
+  function drawWord(m, fade) {
+    if (Math.abs(m - lastM) < 0.004 && Math.abs(fade - lastF) < 0.004) return;
+    lastM = m; lastF = fade;
+    const x = wordCtx;
+    x.clearRect(0, 0, 2048, 512);
+    const draw = (word, out) => {
+      x.font = "800 330px Archivo, Arial, sans-serif";
+      const widths = word.split("").map((ch) => x.measureText(ch).width);
+      const spacing = 34;
+      const total = widths.reduce((a, b) => a + b, 0) + spacing * (word.length - 1);
+      let cx = (2048 - total) / 2;
+      word.split("").forEach((ch, i) => {
+        const d = i * 0.07;
+        const k = Math.max(0, Math.min(1, m * 1.6 - d));
+        const a = (out ? 1 - k : k) * fade;
+        if (a > 0.01) {
+          x.save();
+          x.globalAlpha = a;
+          x.filter = `blur(${(out ? k : 1 - k) * 10}px)`;
+          x.shadowColor = "rgba(210,220,255,0.9)";
+          x.shadowBlur = 46;
+          x.fillStyle = "#ffffff";
+          x.fillText(ch, cx, 388 + (out ? -k : 1 - k) * 52);
+          x.restore();
+        }
+        cx += widths[i] + spacing;
+      });
+    };
+    draw("KAVYA", true);
+    if (m > 0.01) draw("WORK", false);
+    wordTex.needsUpdate = true;
+  }
+  function setWordVisible(v) { wordPlane.visible = v; }
+
+  /* the globe: angle spins the ring, facing panels glow */
+  function setRing(angle, k) {
+    ring.visible = k > 0.02;
+    if (!ring.visible) return;
+    panels.forEach((p, i) => {
+      const a = i * RSTEP + angle;
+      p.position.set(Math.sin(a) * RRAD, Math.sin(a * 2) * 0.04, Math.cos(a) * RRAD);
+      p.rotation.y = a;
+      const facing = Math.max(0, Math.cos(a));
+      p.material.opacity = k * (0.08 + 0.92 * facing * facing * facing);
+    });
+  }
+
   function projectTexture(pr) {
     const c = document.createElement("canvas");
     c.width = 1024; c.height = 588;
@@ -143,7 +212,6 @@ const PrismScene = (() => {
     x.strokeStyle = "rgba(255,255,255,0.05)";
     for (let i = 0; i < 1024; i += 52) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 588); x.stroke(); }
     for (let i = 0; i < 588; i += 52) { x.beginPath(); x.moveTo(0, i); x.lineTo(1024, i); x.stroke(); }
-    // pure visual: the DOM card owns the words, the screen owns the mood
     x.fillStyle = "rgba(255,255,255,0.08)";
     x.font = "800 430px Archivo, Arial";
     x.fillText(pr.num, 560, 500);
@@ -152,23 +220,6 @@ const PrismScene = (() => {
     return new THREE.CanvasTexture(c);
   }
 
-  const billCache = {};
-  function setBillboard(i, k) {
-    if (i != null && billCache[i] === undefined) {
-      const pr = DATA.projects[i];
-      billCache[i] = pr.image
-        ? new THREE.TextureLoader().load(pr.image)
-        : projectTexture(pr);
-    }
-    if (i != null && billMat.map !== billCache[i]) {
-      billMat.map = billCache[i];
-      billMat.needsUpdate = true;
-    }
-    billMat.opacity = k;
-    billboard.visible = k > 0.02;
-  }
-
-  /* k = 0 fragments hidden inside; k = 1 fully split out */
   function setSplit(k, t) {
     frags.forEach((f, i) => {
       const a = f.userData.angle + t * 0.35;
@@ -178,10 +229,9 @@ const PrismScene = (() => {
       f.scale.setScalar(0.4 + k * 0.85);
       f.visible = k > 0.02;
     });
-    // the prism itself calms while fragments are out
     prism.scale.setScalar(1 - k * 0.12);
     wire.scale.setScalar(1 - k * 0.12);
   }
 
-  return { build, setSplit, setBillboard, group: () => prismGroup };
+  return { build, drawWord, setWordVisible, setRing, setSplit, group: () => prismGroup };
 })();

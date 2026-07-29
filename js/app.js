@@ -47,8 +47,9 @@
     return keys[keys.length - 1][1];
   }
   // prism position x, scale, y across the whole journey
-  const PX = [[0, 0], [0.16, 0], [0.20, 3.3], [0.50, 3.3], [0.545, 0], [0.60, 0], [0.63, -2.2], [0.67, -2.2], [0.71, 0], [0.80, 2.2], [0.845, 2.2], [0.88, 0], [1, 0]];
-  const PSC = [[0, 1], [0.10, 1], [0.18, 0.52], [0.50, 0.52], [0.56, 1.05], [0.62, 0.55], [0.70, 0.9], [0.80, 0.5], [0.87, 0.62], [0.95, 0.5], [1, 0.5]];
+  const PX = [[0, 0], [0.16, 0], [0.545, 0], [0.60, 0], [0.63, -2.2], [0.67, -2.2], [0.71, 0], [0.80, 2.2], [0.845, 2.2], [0.88, 0], [1, 0]];
+  const PZ = [[0, 0], [0.16, 0], [0.21, -4.6], [0.50, -4.6], [0.56, 0], [1, 0]];
+  const PSC = [[0, 0.86], [0.10, 0.86], [0.18, 0.9], [0.50, 0.9], [0.56, 1.05], [0.62, 0.55], [0.70, 0.9], [0.80, 0.5], [0.87, 0.62], [0.95, 0.5], [1, 0.5]];
   const PYY = [[0, 0], [0.86, 0], [0.90, 0.35], [0.94, 0.55], [1, 0.7]];
 
   /* ── DOM build ────────────────────────────────────────────── */
@@ -163,9 +164,52 @@
     vg.addColorStop(0, "rgba(4,4,6,0.55)"); vg.addColorStop(1, "rgba(4,4,6,0.05)");
     x.fillStyle = vg; x.fillRect(0, 0, w, h);
   }
-  paintRoom();
-  addEventListener("resize", paintRoom);
+  let roomBase = null;
+  function snapRoom() {
+    roomBase = document.createElement("canvas");
+    const rc = document.getElementById("room");
+    roomBase.width = rc.width; roomBase.height = rc.height;
+    roomBase.getContext("2d").drawImage(rc, 0, 0);
+  }
+  paintRoom(); snapRoom();
+  addEventListener("resize", () => { paintRoom(); snapRoom(); });
 
+  // LED ticker: tiles flicker with project names and fragments
+  const LEDWORDS = [
+    ...DATA.projects.map((p) => p.title.split(" ")[0].toUpperCase()),
+    "KAVYA", "GROWTH OPS", "CRM", "UTM", "BUILD", "SHIP", "AI", "KOLKATA", "2026", "LIVE",
+  ];
+  if (!reduced) setInterval(() => {
+    if (document.hidden || !roomBase) return;
+    const rc = document.getElementById("room");
+    const x = rc.getContext("2d");
+    x.drawImage(roomBase, 0, 0);
+    const tile = Math.max(46, rc.width / 26);
+    for (let n = 0; n < 9; n++) {
+      const tx = Math.floor(Math.random() * (rc.width / tile));
+      const ty = Math.floor(Math.random() * (rc.height / tile));
+      const px = tx * tile, py = ty * tile;
+      const edge = Math.max(
+        Math.abs(px + tile / 2 - rc.width / 2) / (rc.width / 2),
+        Math.abs(py + tile / 2 - rc.height / 2) / (rc.height / 2));
+      if (edge < 0.45) continue; // keep the centre calm for the type
+      if (Math.random() < 0.45) {
+        x.fillStyle = ["#6a4fd8", "#3e5fbf", "#8f9dff"][Math.floor(Math.random() * 3)];
+        x.globalAlpha = 0.2 + Math.random() * 0.4;
+        x.fillRect(px + 1.5, py + 1.5, tile - 3, tile - 3);
+      } else {
+        x.globalAlpha = 0.34 + edge * 0.3;
+        x.fillStyle = "rgba(175,185,255,0.9)";
+        x.font = `${Math.round(tile * 0.17)}px 'IBM Plex Mono', monospace`;
+        x.textAlign = "center";
+        x.fillText(LEDWORDS[Math.floor(Math.random() * LEDWORDS.length)], px + tile / 2, py + tile / 2 + 3);
+        x.textAlign = "start";
+      }
+      x.globalAlpha = 1;
+    }
+  }, 340);
+
+  document.body.classList.add("webgl");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.5 : 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
@@ -178,6 +222,52 @@
   const rim = new THREE.DirectionalLight(0x5f7bd8, 0.8); rim.position.set(-5, -2, -4); scene.add(rim);
 
   const prismGroup = PrismScene.build(scene, renderer);
+
+  /* ── water: a real ripple field follows the cursor ────────── */
+  const ripple = (() => {
+    if (reduced || mobile) return null;
+    const c = document.getElementById("ripple");
+    let W, H, cur, prev, img, rctx;
+    function init() {
+      W = 170; H = Math.max(60, Math.round(170 * innerHeight / innerWidth));
+      c.width = W; c.height = H;
+      rctx = c.getContext("2d");
+      cur = new Float32Array(W * H);
+      prev = new Float32Array(W * H);
+      img = rctx.createImageData(W, H);
+    }
+    init();
+    addEventListener("resize", init);
+    function drop(nx, ny, s) {
+      if (nx > 1 && nx < W - 2 && ny > 1 && ny < H - 2) cur[ny * W + nx] += s;
+    }
+    addEventListener("pointermove", (e) => {
+      drop(Math.round(e.clientX / innerWidth * W), Math.round(e.clientY / innerHeight * H), 1.9);
+    }, { passive: true });
+    addEventListener("click", (e) => {
+      drop(Math.round(e.clientX / innerWidth * W), Math.round(e.clientY / innerHeight * H), 7);
+    });
+    function step() {
+      for (let y = 1; y < H - 1; y++) {
+        const row = y * W;
+        for (let x = 1; x < W - 1; x++) {
+          const i = row + x;
+          let v = (cur[i - 1] + cur[i + 1] + cur[i - W] + cur[i + W]) / 2 - prev[i];
+          prev[i] = v * 0.972;
+        }
+      }
+      const tmp = cur; cur = prev; prev = tmp;
+      const d = img.data;
+      for (let i = 0; i < W * H; i++) {
+        const lum = Math.min(255, Math.abs(cur[i]) * 110);
+        const o = i * 4;
+        d[o] = lum * 0.72; d[o + 1] = lum * 0.82; d[o + 2] = Math.min(255, lum * 1.15);
+        d[o + 3] = Math.min(150, lum * 1.35);
+      }
+      rctx.putImageData(img, 0, 0);
+    }
+    return { step };
+  })();
 
   /* ── cursor: light bend + liquid type + prism tilt ────────── */
   let mx = 0, my = 0, vx = 0, lastX = 0, dispScale = 0;
@@ -216,28 +306,16 @@
     }
   }
 
-  /* ── morph KAVYA → WORK, scrubbed per letter ──────────────── */
-  const kChars = $$("#w-kavya .ch"), wChars = $$("#w-work .ch");
+  /* ── morph KAVYA → WORK, drawn inside WebGL so the glass
+        genuinely refracts and magnifies the letters ─────────── */
   function morph(p) {
     const m = ease(seg(p, 0.08, 0.15));
     const heroFade = 1 - ease(seg(p, 0.16, 0.20));
-    kChars.forEach((c) => {
-      const d = +c.dataset.i * 0.06;
-      const k = clamp01(m * 1.6 - d);
-      c.style.opacity = (1 - k) * heroFade;
-      c.style.transform = `translateY(${-k * 60}px)`;
-      c.style.filter = `blur(${k * 14}px)`;
-    });
-    wChars.forEach((c) => {
-      const d = +c.dataset.i * 0.06;
-      const k = clamp01(m * 1.6 - d);
-      c.style.opacity = k * heroFade;
-      c.style.transform = `translateY(${(1 - k) * 60}px)`;
-      c.style.filter = `blur(${(1 - k) * 14}px)`;
-    });
-    $("#big").style.opacity = p > 0.24 ? 0 : 1;
+    PrismScene.drawWord(m, heroFade);
+    PrismScene.setWordVisible(heroFade > 0.01);
     $("#worksub").style.opacity = m * heroFade;
   }
+  document.fonts?.ready.then(() => PrismScene.drawWord(0.02, 1));
 
   /* ── loop ─────────────────────────────────────────────────── */
   let pS = 0, t = 0, lastT = performance.now(), hudTick = 0;
@@ -262,6 +340,7 @@
     const g = prismGroup;
     g.position.x = (mobile ? 0 : track(PX, pS));
     g.position.y = track(PYY, pS) + Math.sin(t * 0.8) * 0.06;
+    g.position.z = track(PZ, pS);
     g.scale.setScalar(track(PSC, pS) * (mobile ? 0.78 : 1));
     g.rotation.y = t * 0.22 + pS * 5.2 + mx * 0.18;
     g.rotation.x = 0.12 + my * 0.12 + Math.sin(t * 0.5) * 0.03;
@@ -274,11 +353,11 @@
     const act = resolveAct(pS);
     setAct(act, pS);
 
-    // curved billboard follows the active project
-    const bK = act.project != null
-      ? Math.min(ease(seg(pS, act.from, act.from + 0.025)), ease(seg(act.to, pS, act.to - 0.025)))
-      : 0;
-    PrismScene.setBillboard(act.project, mobile ? 0 : bK * 0.95);
+    // the project globe: scroll spins the ring of screens
+    const ringK = Math.min(ease(seg(pS, 0.145, 0.185)), 1 - ease(seg(pS, 0.52, 0.56)));
+    // continuous index: panel i rests centred at its act's centre
+    const ci = seg(pS, 0.16, 0.52) * 4 - 0.5;
+    PrismScene.setRing(-ci * 1.3, mobile ? ringK * 0.85 : ringK);
 
     // engine HUD: live quaternion + axis gizmo
     hudTick += dt;
@@ -303,8 +382,10 @@
     dispScale *= Math.exp(-3 * dt);
     if (!reduced) $("#liquid feDisplacementMap")?.setAttribute("scale", dispScale.toFixed(1));
 
+    if (frameNo++ % 2 === 0) ripple?.step();
     renderer.render(scene, cam);
   }
+  let frameNo = 0;
 
   /* ── act snapping: settle on clean states ─────────────────── */
   const CENTERS = ACTS.map((a) => (a.from + a.to) / 2);

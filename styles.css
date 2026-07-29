@@ -69,6 +69,22 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 
 /* ── blueprint scaffold ────────────────────────────────────── */
 #room { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+/* water ripple field: low-res sim, upscaled soft */
+#ripple {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 65;
+  pointer-events: none; mix-blend-mode: screen; opacity: 0.85;
+  filter: blur(1.6px); image-rendering: auto;
+}
+/* WebGL owns the big word; DOM copy stays for fallback only */
+body.webgl #big { visibility: hidden; }
+/* water ripple field: soft light waves over the whole screen */
+#ripple {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 65;
+  pointer-events: none; mix-blend-mode: screen; opacity: 0.85;
+  filter: blur(2px);
+}
+/* the word lives inside WebGL when available */
+body.webgl #big { visibility: hidden; }
 #scaffold {
   position: fixed; inset: 0; width: 100%; height: 100%;
   z-index: 1; pointer-events: none; opacity: 0.5;
