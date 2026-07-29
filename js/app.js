@@ -218,7 +218,8 @@
      is projected through the frustum to find its tile. */
   const hoverTiles = new Map();
   let hoverHue = Math.random() * 360, lastHoverKey = "";
-  if (!reduced && !mobile) addEventListener("mousemove", (e) => {
+  const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!reduced && (finePointer || !mobile)) addEventListener("mousemove", (e) => {
     const rc = document.getElementById("room");
     if (!rc.width) return;
     const halfH = Math.tan(17 * Math.PI / 180) * 21.2;
