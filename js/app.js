@@ -48,7 +48,9 @@
   }
   // prism position x, scale, y across the whole journey
   const PX = [[0, 0], [0.16, 0], [0.545, 0], [0.60, 0], [0.63, -2.2], [0.67, -2.2], [0.71, 0], [0.80, 2.2], [0.845, 2.2], [0.88, 0], [1, 0]];
-  const PZ = [[0, 0], [0.16, 0], [0.21, -4.6], [0.50, -4.6], [0.56, 0], [1, 0]];
+  // prism retreats early so WORKS makes its front pass IN FRONT
+  // of the glass, exactly like the project panels after it
+  const PZ = [[0, 0], [0.085, 0], [0.13, -4.6], [0.50, -4.6], [0.56, 0], [1, 0]];
   const PSC = [[0, 0.86], [0.10, 0.86], [0.18, 0.9], [0.50, 0.9], [0.56, 1.05], [0.62, 0.55], [0.70, 0.9], [0.80, 0.5], [0.87, 0.62], [0.95, 0.5], [1, 0.5]];
   const PYY = [[0, 0], [0.86, 0], [0.90, 0.35], [0.94, 0.55], [1, 0.7]];
 
@@ -311,7 +313,8 @@
         genuinely refracts and magnifies the letters ─────────── */
   function morph(p) {
     const m = ease(seg(p, 0.08, 0.15));
-    const heroFade = 1 - ease(seg(p, 0.105, 0.155));
+    // KAVYA hands over just before WORKS reaches the ring's front
+    const heroFade = 1 - ease(seg(p, 0.078, 0.112));
     PrismScene.drawWord(m, heroFade);
     PrismScene.setWordVisible(heroFade > 0.01);
     $("#worksub").style.opacity = m * heroFade;
@@ -356,7 +359,7 @@
 
     // the project globe: WORKS revolves in first (slot -1),
     // then each project rests centred at its act's centre
-    const ringK = Math.min(ease(seg(pS, 0.085, 0.125)), 1 - ease(seg(pS, 0.52, 0.56)));
+    const ringK = Math.min(ease(seg(pS, 0.075, 0.105)), 1 - ease(seg(pS, 0.52, 0.56)));
     const ci = Math.max(-1.7, Math.min(3.6, (pS - 0.205) / 0.09));
     PrismScene.setRing(-ci * 1.3, mobile ? ringK * 0.85 : ringK);
 
