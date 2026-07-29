@@ -36,6 +36,8 @@
     <circle cx="720" cy="450" r="170" class="dash" />
   </svg>
 
+  <canvas id="room" aria-hidden="true"></canvas>
+
   <main id="runway" aria-hidden="true"></main>
 
   <div id="pin" aria-hidden="true">
@@ -89,9 +91,28 @@
   <nav id="topnav" class="mono" aria-label="Navigation">
     <a href="#" data-jump="0.205">Work</a>
     <a href="#" data-jump="0.64">About</a>
-    <a href="#" data-jump="0.90">Contact</a>
+    <a href="#" data-jump="0.90" class="pill">Contact</a>
   </nav>
   <div id="progress" aria-hidden="true"><i></i></div>
+
+  <!-- engine-editor HUD: live prism telemetry -->
+  <div id="hudq" class="mono" aria-hidden="true">
+    <span class="hl">Prism Quaternion</span>
+    <span id="quat">.00 .00 .00 1.0</span>
+    <svg id="gizmo" viewBox="-40 -40 80 80">
+      <circle r="34" fill="none" />
+      <line id="gx1" x1="0" y1="0" x2="0" y2="0" class="gx" /><circle id="gx" r="4" class="gx" />
+      <line id="gy1" x1="0" y1="0" x2="0" y2="0" class="gy" /><circle id="gy" r="4" class="gy" />
+      <line id="gz1" x1="0" y1="0" x2="0" y2="0" class="gz" /><circle id="gz" r="4" class="gz" />
+    </svg>
+  </div>
+  <div id="hudm" class="mono" aria-hidden="true">
+    <span class="hl">Prism Material</span>
+    <span>roughness <b>0.14</b></span>
+    <span>ior <b>1.45</b></span>
+    <span>iridescence <b>1.00</b></span>
+    <span>transmission <b>1.00</b></span>
+  </div>
   <span id="actname" class="mono" aria-hidden="true"></span>
   <div id="cursorlight" aria-hidden="true"></div>
 

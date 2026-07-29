@@ -47,8 +47,8 @@
     return keys[keys.length - 1][1];
   }
   // prism position x, scale, y across the whole journey
-  const PX = [[0, 0], [0.16, 0], [0.20, 2.1], [0.50, 2.1], [0.545, 0], [0.60, 0], [0.63, -2.2], [0.67, -2.2], [0.71, 0], [0.80, 2.2], [0.845, 2.2], [0.88, 0], [1, 0]];
-  const PSC = [[0, 1], [0.10, 1], [0.18, 0.72], [0.50, 0.72], [0.56, 1.05], [0.62, 0.55], [0.70, 0.9], [0.80, 0.5], [0.87, 0.62], [0.95, 0.5], [1, 0.5]];
+  const PX = [[0, 0], [0.16, 0], [0.20, 3.3], [0.50, 3.3], [0.545, 0], [0.60, 0], [0.63, -2.2], [0.67, -2.2], [0.71, 0], [0.80, 2.2], [0.845, 2.2], [0.88, 0], [1, 0]];
+  const PSC = [[0, 1], [0.10, 1], [0.18, 0.52], [0.50, 0.52], [0.56, 1.05], [0.62, 0.55], [0.70, 0.9], [0.80, 0.5], [0.87, 0.62], [0.95, 0.5], [1, 0.5]];
   const PYY = [[0, 0], [0.86, 0], [0.90, 0.35], [0.94, 0.55], [1, 0.7]];
 
   /* ── DOM build ────────────────────────────────────────────── */
@@ -129,6 +129,43 @@
     return;
   }
 
+  /* the LED room: painted once, sits behind the typography */
+  function paintRoom() {
+    const rc = document.getElementById("room");
+    const w = (rc.width = innerWidth), h = (rc.height = innerHeight);
+    const x = rc.getContext("2d");
+    x.fillStyle = "#07070c"; x.fillRect(0, 0, w, h);
+    const tile = Math.max(46, w / 26);
+    for (let ty = -1; ty < h / tile + 1; ty++) {
+      for (let tx = -1; tx < w / tile + 1; tx++) {
+        const px = tx * tile, py = ty * tile;
+        // edge tiles glow more, centre stays dark for the type
+        const dx = Math.abs(px + tile / 2 - w / 2) / (w / 2);
+        const dy = Math.abs(py + tile / 2 - h / 2) / (h / 2);
+        const edge = Math.max(dx, dy);
+        const r = Math.random();
+        let col = "#0d0d16";
+        if (r > 0.955 - edge * 0.12) col = ["#6a4fd8", "#3e5fbf", "#8f9dff", "#2a2a44"][Math.floor(Math.random() * 4)];
+        x.fillStyle = col;
+        x.globalAlpha = col === "#0d0d16" ? 1 : 0.24 + edge * 0.5;
+        x.fillRect(px + 1.5, py + 1.5, tile - 3, tile - 3);
+        x.globalAlpha = 1;
+      }
+    }
+    // washes + vignette
+    const wg = x.createRadialGradient(w * 0.15, h * 0.1, 60, w * 0.15, h * 0.1, w * 0.7);
+    wg.addColorStop(0, "rgba(106,79,216,0.18)"); wg.addColorStop(1, "transparent");
+    x.fillStyle = wg; x.fillRect(0, 0, w, h);
+    const bg2 = x.createRadialGradient(w * 0.9, h * 0.85, 60, w * 0.9, h * 0.85, w * 0.7);
+    bg2.addColorStop(0, "rgba(62,95,191,0.16)"); bg2.addColorStop(1, "transparent");
+    x.fillStyle = bg2; x.fillRect(0, 0, w, h);
+    const vg = x.createRadialGradient(w / 2, h / 2, h * 0.28, w / 2, h / 2, h * 0.95);
+    vg.addColorStop(0, "rgba(4,4,6,0.55)"); vg.addColorStop(1, "rgba(4,4,6,0.05)");
+    x.fillStyle = vg; x.fillRect(0, 0, w, h);
+  }
+  paintRoom();
+  addEventListener("resize", paintRoom);
+
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.5 : 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
@@ -203,7 +240,10 @@
   }
 
   /* ── loop ─────────────────────────────────────────────────── */
-  let pS = 0, t = 0, lastT = performance.now();
+  let pS = 0, t = 0, lastT = performance.now(), hudTick = 0;
+  const quatEl = $("#quat"),
+    gx = $("#gx"), gy = $("#gy"), gz = $("#gz"),
+    gx1 = $("#gx1"), gy1 = $("#gy1"), gz1 = $("#gz1");
   function progress() {
     const doc = document.body.scrollHeight - innerHeight;
     return doc > 0 ? clamp01(scrollY / doc) : 0;
@@ -231,7 +271,33 @@
     PrismScene.setSplit(reduced ? 0 : split, t);
 
     morph(pS);
-    setAct(resolveAct(pS), pS);
+    const act = resolveAct(pS);
+    setAct(act, pS);
+
+    // curved billboard follows the active project
+    const bK = act.project != null
+      ? Math.min(ease(seg(pS, act.from, act.from + 0.025)), ease(seg(act.to, pS, act.to - 0.025)))
+      : 0;
+    PrismScene.setBillboard(act.project, mobile ? 0 : bK * 0.95);
+
+    // engine HUD: live quaternion + axis gizmo
+    hudTick += dt;
+    if (hudTick > 0.12) {
+      hudTick = 0;
+      const q = g.quaternion;
+      quatEl.textContent = `${q.x.toFixed(2)} ${q.y.toFixed(2)} ${q.z.toFixed(2)} ${q.w.toFixed(2)}`;
+      const axes = [
+        [new THREE.Vector3(1, 0, 0), gx, gx1],
+        [new THREE.Vector3(0, 1, 0), gy, gy1],
+        [new THREE.Vector3(0, 0, 1), gz, gz1],
+      ];
+      for (const [v, dot, ln] of axes) {
+        v.applyQuaternion(q);
+        const sx = (v.x * 30).toFixed(1), sy = (-v.y * 30).toFixed(1);
+        dot.setAttribute("cx", sx); dot.setAttribute("cy", sy);
+        ln.setAttribute("x2", sx); ln.setAttribute("y2", sy);
+      }
+    }
 
     // liquid type decay
     dispScale *= Math.exp(-3 * dt);
