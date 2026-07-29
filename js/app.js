@@ -172,7 +172,7 @@
     roomBase.getContext("2d").drawImage(rc, 0, 0);
   }
   paintRoom(); snapRoom();
-  addEventListener("resize", () => { paintRoom(); snapRoom(); });
+  addEventListener("resize", () => { paintRoom(); snapRoom(); PrismScene.updateBackdrop?.(); });
 
   // LED ticker: tiles flicker with project names and fragments
   const LEDWORDS = [
@@ -207,6 +207,7 @@
       }
       x.globalAlpha = 1;
     }
+    PrismScene.updateBackdrop?.();
   }, 340);
 
   document.body.classList.add("webgl");

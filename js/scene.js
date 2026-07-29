@@ -10,8 +10,8 @@
 
 const PrismScene = (() => {
   let scene, prismGroup, prism, wire, frags = [], envRT, stars;
-  let wordTex, wordPlane, wordCtx, lastM = -1, lastF = -1;
-  let ring, panels = [];
+  let wordTex, wordPlane, wordCtx, glowTex, glowPlane, glowCtx, lastM = -1, lastF = -1;
+  let ring, panels = [], backdropTex;
   const RSTEP = 1.3, RRAD = 6.4, RCZ = -6.8;
 
   /* bright violet/blue studio the glass refracts */
@@ -46,12 +46,29 @@ const PrismScene = (() => {
     wordCtx = wc.getContext("2d");
     wordTex = new THREE.CanvasTexture(wc);
     wordTex.anisotropy = 4;
+    const wordGeo = new THREE.PlaneGeometry(5.42, 5.42 * 640 / 2048);
+    // crisp core: alphaTest keeps it in the opaque pass, which is
+    // what the glass transmission buffer samples and magnifies
     wordPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(5.42, 5.42 * 640 / 2048),
-      new THREE.MeshBasicMaterial({ map: wordTex, transparent: true, toneMapped: false })
+      wordGeo,
+      new THREE.MeshBasicMaterial({ map: wordTex, alphaTest: 0.5, transparent: false, toneMapped: false })
     );
     wordPlane.position.set(0, 0.02, -1.7);
     scene.add(wordPlane);
+    // soft glow: separate additive layer (doesn't need to refract)
+    const gc = document.createElement("canvas");
+    gc.width = 2048; gc.height = 640;
+    glowCtx = gc.getContext("2d");
+    glowTex = new THREE.CanvasTexture(gc);
+    glowPlane = new THREE.Mesh(
+      wordGeo,
+      new THREE.MeshBasicMaterial({
+        map: glowTex, transparent: true, blending: THREE.AdditiveBlending,
+        depthWrite: false, toneMapped: false,
+      })
+    );
+    glowPlane.position.set(0, 0.02, -1.72);
+    scene.add(glowPlane);
 
     /* ── prism group ───────────────────────────────────────── */
     prismGroup = new THREE.Group();
@@ -77,26 +94,25 @@ const PrismScene = (() => {
     const noiseTex = new THREE.CanvasTexture(nc);
     noiseTex.wrapS = noiseTex.wrapT = THREE.RepeatWrapping;
 
-    // clear optical glass: fully see-through, refracts and
-    // magnifies whatever sits behind it
+    // clear optical glass, pure transmission: the renderer's
+    // transmission buffer now contains the word and the LED room,
+    // so the prism visibly refracts and magnifies both
     const glass = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       transmission: 1,
-      thickness: 1.3,
-      roughness: 0.05,
+      thickness: 1.1,
+      roughness: 0.04,
       metalness: 0,
-      ior: 1.52,
+      ior: 1.5,
       envMap: env,
-      envMapIntensity: 1.6,
+      envMapIntensity: 1.15,
       clearcoat: 1,
       clearcoatRoughness: 0.05,
-      iridescence: 0.5,
+      iridescence: 0.45,
       iridescenceIOR: 1.6,
       attenuationColor: new THREE.Color(0xe6ecff),
-      attenuationDistance: 9,
+      attenuationDistance: 10,
       side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.88,   // guaranteed see-through on every renderer
     });
     prism = new THREE.Mesh(geo, glass);
     prismGroup.add(prism);
@@ -172,8 +188,21 @@ const PrismScene = (() => {
     ring.add(worksPanel);
     panels.push(worksPanel);
 
+    /* the LED room as an in-scene backdrop: the painted DOM
+       canvas becomes a texture, so the glass refracts the room */
+    const roomCanvas = document.getElementById("room");
+    backdropTex = new THREE.CanvasTexture(roomCanvas);
+    const backdrop = new THREE.Mesh(
+      new THREE.PlaneGeometry(34, 17),
+      new THREE.MeshBasicMaterial({ map: backdropTex, toneMapped: false })
+    );
+    backdrop.position.set(0, 0, -14);
+    scene.add(backdrop);
+
     return prismGroup;
   }
+
+  function updateBackdrop() { if (backdropTex) backdropTex.needsUpdate = true; }
 
   /* redraw the word only when the morph state changes.
      KAVYA fills the full canvas width; on scroll it dissolves
@@ -181,19 +210,26 @@ const PrismScene = (() => {
   function drawWord(m, fade) {
     if (Math.abs(m - lastM) < 0.004 && Math.abs(fade - lastF) < 0.004) return;
     lastM = m; lastF = fade;
-    const x = wordCtx;
-    x.clearRect(0, 0, 2048, 640);
     const word = "KAVYA";
+    const x = wordCtx;
     x.font = "800 300px Archivo, Arial, sans-serif";
     let widths = word.split("").map((ch) => x.measureText(ch).width);
     let total = widths.reduce((a, b) => a + b, 0) + 40 * (word.length - 1);
     const fit = 1960 / total;
     const fontPx = Math.floor(300 * fit), spacing = 40 * fit;
-    x.font = `800 ${fontPx}px Archivo, Arial, sans-serif`;
+    const font = `800 ${fontPx}px Archivo, Arial, sans-serif`;
+    x.font = font;
     widths = word.split("").map((ch) => x.measureText(ch).width);
     total = widths.reduce((a, b) => a + b, 0) + spacing * (word.length - 1);
-    let cx = (2048 - total) / 2;
+    const startX = (2048 - total) / 2;
     const baseY = 320 + fontPx * 0.36;
+
+    // pass 1: crisp core (opaque pass, refracted by the glass)
+    x.clearRect(0, 0, 2048, 640);
+    // pass 2: soft glow (additive layer)
+    glowCtx.clearRect(0, 0, 2048, 640);
+    glowCtx.font = font;
+    let cx = startX;
     word.split("").forEach((ch, i) => {
       const d = i * 0.07;
       const k = Math.max(0, Math.min(1, m * 1.6 - d));
@@ -202,17 +238,22 @@ const PrismScene = (() => {
         x.save();
         x.globalAlpha = a;
         x.filter = `blur(${k * 10}px)`;
-        x.shadowColor = "rgba(210,220,255,0.9)";
-        x.shadowBlur = 60;
         x.fillStyle = "#ffffff";
         x.fillText(ch, cx, baseY - k * 60);
         x.restore();
+        glowCtx.save();
+        glowCtx.globalAlpha = a * 0.7;
+        glowCtx.filter = `blur(${18 + k * 12}px)`;
+        glowCtx.fillStyle = "rgba(200,212,255,0.9)";
+        glowCtx.fillText(ch, cx, baseY - k * 60);
+        glowCtx.restore();
       }
       cx += widths[i] + spacing;
     });
     wordTex.needsUpdate = true;
+    glowTex.needsUpdate = true;
   }
-  function setWordVisible(v) { wordPlane.visible = v; }
+  function setWordVisible(v) { wordPlane.visible = v; glowPlane.visible = v; }
 
   /* the globe: angle spins the ring, facing panels glow */
   function setRing(angle, k) {
@@ -259,5 +300,5 @@ const PrismScene = (() => {
     wire.scale.setScalar(1 - k * 0.12);
   }
 
-  return { build, drawWord, setWordVisible, setRing, setSplit, group: () => prismGroup };
+  return { build, drawWord, setWordVisible, setRing, setSplit, updateBackdrop, group: () => prismGroup };
 })();
