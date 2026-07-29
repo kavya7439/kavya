@@ -212,6 +212,53 @@
     PrismScene.updateBackdrop?.();
   }, 340);
 
+  /* hover: the LED tile under the cursor lights up, a new colour
+     every tile. The room canvas shows through the WebGL backdrop
+     plane (34×17 at z −14, camera z 7.2, fov 34°), so the cursor
+     is projected through the frustum to find its tile. */
+  const hoverTiles = new Map();
+  let hoverHue = Math.random() * 360, lastHoverKey = "";
+  if (!reduced && !mobile) addEventListener("mousemove", (e) => {
+    const rc = document.getElementById("room");
+    if (!rc.width) return;
+    const halfH = Math.tan(17 * Math.PI / 180) * 21.2;
+    const nx = (e.clientX / innerWidth) * 2 - 1;
+    const ny = 1 - (e.clientY / innerHeight) * 2;
+    const cx = (0.5 + (nx * halfH * (innerWidth / innerHeight)) / 34) * rc.width;
+    const cy = (0.5 - (ny * halfH) / 17) * rc.height;
+    const tile = Math.max(46, rc.width / 26);
+    const tx = Math.floor(cx / tile), ty = Math.floor(cy / tile);
+    const key = tx + "," + ty;
+    if (key === lastHoverKey || hoverTiles.has(key)) return;
+    lastHoverKey = key;
+    hoverHue = (hoverHue + 47 + Math.random() * 130) % 360;
+    hoverTiles.set(key, { tx, ty, hue: Math.round(hoverHue), life: 1.25 });
+  });
+  function paintHover(dt) {
+    if (!hoverTiles.size || !roomBase) return;
+    const rc = document.getElementById("room");
+    const x = rc.getContext("2d");
+    const tile = Math.max(46, rc.width / 26);
+    hoverTiles.forEach((h, key) => {
+      const px = h.tx * tile, py = h.ty * tile;
+      x.drawImage(roomBase, px, py, tile, tile, px, py, tile, tile);
+      const a = Math.min(1, h.life);
+      x.globalAlpha = a * 0.85;
+      x.fillStyle = `hsl(${h.hue} 85% 62%)`;
+      x.fillRect(px + 1.5, py + 1.5, tile - 3, tile - 3);
+      x.globalAlpha = a * 0.5;
+      x.fillStyle = `hsl(${h.hue} 95% 80%)`;
+      x.fillRect(px + tile * 0.2, py + tile * 0.2, tile * 0.6, tile * 0.6);
+      x.globalAlpha = 1;
+      h.life -= dt * 1.1;
+      if (h.life <= 0) {
+        x.drawImage(roomBase, px, py, tile, tile, px, py, tile, tile);
+        hoverTiles.delete(key);
+      }
+    });
+    PrismScene.updateBackdrop?.();
+  }
+
   document.body.classList.add("webgl");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.5 : 2));
@@ -339,6 +386,7 @@
     t += dt;
 
     pS += (progress() - pS) * (reduced ? 1 : 1 - Math.exp(-6.5 * dt));
+    paintHover(dt);
 
     // prism choreography: it never disappears, it travels
     const g = prismGroup;
