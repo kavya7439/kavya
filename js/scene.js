@@ -158,7 +158,11 @@ const PrismScene = (() => {
       const mat = new THREE.MeshBasicMaterial({
         map: projectTexture(pr), transparent: true, opacity: 0, toneMapped: false,
       });
-      if (pr.image) new THREE.TextureLoader().load(pr.image, (t) => { mat.map = t; mat.needsUpdate = true; });
+      if (pr.image) new THREE.TextureLoader().load(pr.image, (t) => {
+        t.encoding = THREE.sRGBEncoding;
+        t.anisotropy = 4;
+        mat.map = t; mat.needsUpdate = true;
+      });
       const p = new THREE.Mesh(bg, mat);
       p.userData.slot = i;
       ring.add(p);

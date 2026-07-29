@@ -33,7 +33,7 @@ const DATA = {
       category: "Content strategy · UX structure · Testing",
       desc: "A 30-year education company's website, restructured into clearer journeys for students and internal teams.",
       accent: "#7AA2FF",
-      image: "",
+      image: "assets/p1.jpg",
       links: [{ label: "Visit live", href: "https://www.ssei.co.in/" }],
     },
     {
@@ -42,7 +42,7 @@ const DATA = {
       category: "Product · Data · Built with AI",
       desc: "One live dashboard that replaced scattered spreadsheets for leads, spends and launches. The weekly review runs on it.",
       accent: "#9BB8D4",
-      image: "",
+      image: "assets/p2.jpg",
       links: [
         { label: "Open dashboard", href: "https://growthkavya.github.io/growth-ops-dashboard/lab/" },
         { label: "Code", href: "https://github.com/growthkavya/growth-ops-dashboard" },
@@ -54,7 +54,7 @@ const DATA = {
       category: "Internal tool · Operations",
       desc: "Attendance, tasks and team management in one place. In daily use for over two months.",
       accent: "#8FD0B2",
-      image: "",
+      image: "assets/p3.jpg",
       links: [{ label: "See it live", href: "https://growthkavya.github.io/growth-ops-dashboard/lab/" }],
     },
     {
@@ -63,7 +63,7 @@ const DATA = {
       category: "Analytics · Reporting design",
       desc: "Lead attribution for the new SSEI website. Every identified action traced back to its source.",
       accent: "#C9CDD6",
-      image: "",
+      image: "assets/p4.jpg",
       links: [{ label: "Open the spec", href: "https://kavya7439.github.io/utm-attribution-dashboard/" }],
     },
   ],
