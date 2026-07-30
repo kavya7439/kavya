@@ -12,7 +12,7 @@ const DATA = {
   profile: {
     name: "Kavya Bahety",
     email: "growthops@ssei.co.in",
-    phone: "+91 74399 99999",
+    phone: "+91 74399 97544",
     linkedin: "https://www.linkedin.com/in/kavya-bahety",
     github: "https://github.com/growthkavya",
     location: "Kolkata, India",
