@@ -78,6 +78,8 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 /* WebGL owns the big word; DOM copy stays for fallback only */
 body.webgl #big { visibility: hidden; }
 body.webgl #room { visibility: hidden; }
+/* the revolving PROOF OF WORK panel carries this line in WebGL */
+body.webgl #worksub { display: none; }
 /* water ripple field: soft light waves over the whole screen */
 #ripple {
   position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 65;
@@ -101,7 +103,7 @@ body.webgl #room { visibility: hidden; }
 @keyframes fadein { to { opacity: 1; } }
 
 /* ── runway + stage ────────────────────────────────────────── */
-#runway { height: 1300vh; }
+#runway { height: 950vh; }
 #pin { position: fixed; inset: 0; z-index: 2; }
 #stage { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
 
@@ -129,11 +131,14 @@ body.webgl #room { visibility: hidden; }
 
 #tagline {
   position: absolute; left: 50%; bottom: 18vh; transform: translateX(-50%);
-  z-index: 4; opacity: 0.55; transition: opacity 0.6s;
+  z-index: 4; opacity: 0.85; transition: opacity 0.6s;
+  width: max-content; max-width: 90vw; text-align: center;
 }
 #worksub {
-  position: absolute; left: 50%; top: 16vh; transform: translateX(-50%);
-  z-index: 4; opacity: 0; color: var(--blue);
+  position: absolute; left: 50%; top: 14vh; transform: translateX(-50%);
+  z-index: 4; opacity: 0; color: #c7d4f2;
+  width: max-content; max-width: min(92vw, 52rem); text-align: center;
+  font-size: clamp(0.8rem, 1.5vw, 1rem); line-height: 1.6;
 }
 body:not([data-act="hero"]) #tagline { opacity: 0; }
 
@@ -176,7 +181,7 @@ body[data-act="footer"] #footer {
   font-family: var(--font-s); font-style: italic;
   font-size: clamp(1.9rem, 4.6vw, 3.8rem); line-height: 1.15; max-width: 22ch;
 }
-#philo .sub { margin-top: 1.2rem; opacity: 0.6; font-size: clamp(1rem, 2vw, 1.3rem); }
+#philo .sub { margin-top: 1.2rem; opacity: 0.82; font-size: clamp(1rem, 2vw, 1.3rem); }
 
 /* about */
 #about { left: 8vw; }
@@ -193,7 +198,7 @@ body[data-act="footer"] #footer {
   transition: opacity 0.8s var(--ease) var(--d, 0ms);
 }
 body[data-act="process"] #process .pw { opacity: 0.85; }
-#process .sub { margin-top: 2rem; opacity: 0.55; font-size: clamp(0.95rem, 1.8vw, 1.15rem); }
+#process .sub { margin-top: 2rem; opacity: 0.82; font-size: clamp(0.95rem, 1.8vw, 1.15rem); }
 
 /* achievements */
 #achieve { right: 8vw; left: auto; }
@@ -207,7 +212,7 @@ body[data-act="process"] #process .pw { opacity: 0.85; }
 
 /* cta */
 #cta h2 { font-weight: 800; letter-spacing: -0.03em; font-size: clamp(2.2rem, 6vw, 5rem); line-height: 1; max-width: 16ch; }
-#cta .sub { margin: 1rem 0 2rem; opacity: 0.6; }
+#cta .sub { margin: 1rem 0 2rem; opacity: 0.82; }
 #cta .mail {
   font-size: clamp(1.1rem, 2.6vw, 1.8rem); font-weight: 300; letter-spacing: 0.02em;
   border-bottom: 1px solid var(--soft); padding-bottom: 0.2em;
@@ -232,7 +237,7 @@ body[data-act="process"] #process .pw { opacity: 0.85; }
   transition: opacity 0.3s, border-color 0.3s;
 }
 #footer .flinks a:hover { opacity: 1; border-color: var(--ink); }
-#footer .fmeta { margin-top: 2.4rem; opacity: 0.3; }
+#footer .fmeta { margin-top: 2.4rem; opacity: 0.55; }
 
 /* ── projects ──────────────────────────────────────────────── */
 #pcards { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
@@ -270,8 +275,8 @@ body[data-act="process"] #process .pw { opacity: 0.85; }
 .pmeta { margin-top: 1.3rem; }
 .pnum { color: var(--blue); }
 .pmeta h2 { font-weight: 800; letter-spacing: -0.02em; font-size: clamp(1.5rem, 3.2vw, 2.4rem); margin: 0.5rem 0 0.3rem; }
-.pcat { opacity: 0.45; margin-bottom: 0.7rem; }
-.pdesc { font-weight: 300; opacity: 0.75; max-width: 44ch; margin-bottom: 1rem; }
+.pcat { opacity: 0.72; margin-bottom: 0.7rem; }
+.pdesc { font-weight: 300; opacity: 0.9; max-width: 44ch; margin-bottom: 1rem; }
 .plinks { display: flex; gap: 1.6rem; }
 .lnk {
   font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8;
@@ -295,10 +300,6 @@ body[data-act="process"] #process .pw { opacity: 0.85; }
 #progress i {
   display: block; width: 100%; height: 0;
   background: linear-gradient(180deg, var(--blue), rgba(255,255,255,0.9));
-}
-#actname {
-  position: fixed; left: calc(var(--pad) * 0.45 - 0.31rem); top: calc(50% + 18vh); z-index: 90;
-  writing-mode: vertical-rl; opacity: 0.4; letter-spacing: 0.32em;
 }
 
 /* cursor light: bends the atmosphere */
@@ -333,28 +334,6 @@ body.fallback #doc a { color: var(--blue); }
 }
 #topnav .pill:hover { background: rgba(242,243,245,0.1); opacity: 1; }
 
-/* engine-editor HUD */
-#hudq {
-  position: fixed; right: var(--pad); top: 16vh; z-index: 90;
-  display: grid; gap: 0.6rem; justify-items: end; text-align: right;
-  letter-spacing: 0.18em; opacity: 0.65;
-}
-#hudq .hl, #hudm .hl { color: var(--blue); opacity: 0.9; }
-#gizmo { width: 84px; height: 84px; margin-top: 0.4rem; }
-#gizmo circle:first-child { stroke: rgba(242,243,245,0.2); stroke-dasharray: 3 4; }
-#gizmo .gx { fill: #e05c5c; stroke: #e05c5c; stroke-width: 1; }
-#gizmo .gy { fill: #58c98a; stroke: #58c98a; stroke-width: 1; }
-#gizmo .gz { fill: #5c8ce0; stroke: #5c8ce0; stroke-width: 1; }
-#gizmo line { opacity: 0.6; }
-#hudm {
-  position: fixed; left: var(--pad); bottom: 8vh; z-index: 90;
-  display: grid; gap: 0.35rem; letter-spacing: 0.18em; opacity: 0.55;
-}
-#hudm b { color: var(--ink); font-weight: 400; margin-left: 0.6em; }
-body[data-act="hero"] #hudm, body[data-act="morph"] #hudm { opacity: 0.55; }
-body:not([data-act="hero"]):not([data-act="morph"]):not([data-act="footer"]) #hudm { opacity: 0; }
-#hudq, #hudm { transition: opacity 0.6s var(--ease); pointer-events: none; }
-@media (max-width: 900px) { #hudq, #hudm { display: none; } }
 /* desktop: the curved WebGL screen is the project visual */
 @media (min-width: 901px) { .pframe { display: none; } .pcard .ghost { display: none; } }
 
@@ -369,6 +348,8 @@ body:not([data-act="hero"]):not([data-act="morph"]):not([data-act="footer"]) #hu
 
 /* ── responsive ────────────────────────────────────────────── */
 @media (max-width: 900px) {
+  .pframe { background-size: 100% auto; background-position: 0% 0%; }
+  .pcard.on .pframe { animation: sitescroll 9s ease-in-out infinite alternate; }
   .pcard { width: min(30rem, 84vw); left: 50%; top: auto; bottom: 6vh; transform: translate(-50%, 30px); }
   .pcard.on { transform: translate(-50%, 0); }
   .pcard .ghost { top: -16vh; font-size: 24vw; }
@@ -390,3 +371,5 @@ body:not([data-act="hero"]):not([data-act="morph"]):not([data-act="footer"]) #hu
   #tagline { bottom: 12vh; }
 }
 @media print { #pin, #runway, #scaffold, #cursorlight { display: none !important; } }
+
+@keyframes sitescroll { from { background-position-y: 0%; } to { background-position-y: 100%; } }

@@ -161,6 +161,12 @@ const PrismScene = (() => {
       if (pr.image) new THREE.TextureLoader().load(pr.image, (t) => {
         t.encoding = THREE.sRGBEncoding;
         t.anisotropy = 4;
+        t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+        t.generateMipmaps = false;
+        t.minFilter = THREE.LinearFilter;
+        // visible fraction of a tall capture; the rest scrolls by
+        const frac = Math.min(1, t.image.width / (1.7233 * t.image.height));
+        if (frac < 1) { t.repeat.set(1, frac); p.userData.scroll = { tex: t, frac }; }
         mat.map = t; mat.needsUpdate = true;
       });
       const p = new THREE.Mesh(bg, mat);
@@ -169,16 +175,21 @@ const PrismScene = (() => {
       panels.push(p);
     });
 
-    // the word WORKS revolves around the prism, one slot ahead
+    // the proof-of-work banner revolves around the prism, one slot ahead
     const wt = document.createElement("canvas");
     wt.width = 2048; wt.height = 512;
     const wx = wt.getContext("2d");
-    wx.font = "800 340px Archivo, Arial, sans-serif";
-    const ww = wx.measureText("WORKS").width;
+    wx.textAlign = "center";
     wx.shadowColor = "rgba(210,220,255,0.85)";
-    wx.shadowBlur = 70;
+    wx.shadowBlur = 60;
     wx.fillStyle = "#ffffff";
-    wx.fillText("WORKS", (2048 - ww) / 2, 380);
+    wx.font = "800 236px Archivo, Arial, sans-serif";
+    wx.fillText("PROOF OF WORK", 1024, 268);
+    wx.shadowBlur = 24;
+    wx.fillStyle = "rgba(199,212,242,0.95)";
+    wx.font = "500 74px Archivo, Arial, sans-serif";
+    wx.fillText("no tech background · 21 · built with AI", 1024, 420);
+    wx.textAlign = "start";
     const wpGeo = new THREE.PlaneGeometry(6.6, 6.6 * 512 / 2048, 32, 1);
     const wpos2 = wpGeo.attributes.position;
     for (let i = 0; i < wpos2.count; i++) {
@@ -189,6 +200,7 @@ const PrismScene = (() => {
       map: new THREE.CanvasTexture(wt), transparent: true, opacity: 0, toneMapped: false,
     }));
     worksPanel.userData.slot = -1;
+    worksPanel.scale.setScalar(0.8);
     ring.add(worksPanel);
     panels.push(worksPanel);
 
@@ -246,7 +258,7 @@ const PrismScene = (() => {
         x.fillText(ch, cx, baseY - k * 60);
         x.restore();
         glowCtx.save();
-        glowCtx.globalAlpha = a * 0.7;
+        glowCtx.globalAlpha = a * 0.9;
         glowCtx.filter = `blur(${18 + k * 12}px)`;
         glowCtx.fillStyle = "rgba(200,212,255,0.9)";
         glowCtx.fillText(ch, cx, baseY - k * 60);
@@ -258,17 +270,28 @@ const PrismScene = (() => {
     glowTex.needsUpdate = true;
   }
   function setWordVisible(v) { wordPlane.visible = v; glowPlane.visible = v; }
+  function setWordScale(sc) { wordPlane.scale.setScalar(sc); glowPlane.scale.setScalar(sc); }
+  function configRing(sc, x) { ring.scale.setScalar(sc); ring.position.x = x; }
 
   /* the globe: angle spins the ring, facing panels glow */
   function setRing(angle, k) {
     ring.visible = k > 0.02;
     if (!ring.visible) return;
+    const now = performance.now() / 1000;
     panels.forEach((p) => {
       const a = p.userData.slot * RSTEP + angle;
       p.position.set(Math.sin(a) * RRAD, Math.sin(a * 2) * 0.04, Math.cos(a) * RRAD);
       p.rotation.y = a;
       const facing = Math.max(0, Math.cos(a));
       p.material.opacity = k * (0.08 + 0.92 * facing * facing * facing);
+      const sc = p.userData.scroll;
+      if (sc) {
+        // ping-pong through the tall capture, like a screen recording
+        const ph = (now * 0.09 + p.userData.slot * 0.31) % 2;
+        const kk0 = ph < 1 ? ph : 2 - ph;
+        const kk = kk0 * kk0 * (3 - 2 * kk0);
+        sc.tex.offset.y = (1 - sc.frac) * (1 - kk);
+      }
     });
   }
 
@@ -304,5 +327,5 @@ const PrismScene = (() => {
     wire.scale.setScalar(1 - k * 0.12);
   }
 
-  return { build, drawWord, setWordVisible, setRing, setSplit, updateBackdrop, group: () => prismGroup };
+  return { build, drawWord, setWordVisible, setWordScale, configRing, setRing, setSplit, updateBackdrop, group: () => prismGroup };
 })();

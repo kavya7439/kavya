@@ -12,7 +12,8 @@
   <meta property="og:title" content="KAVYA — the prism">
   <meta property="og:description" content="Creating experiences that are remembered long after they're seen.">
   <meta property="og:image" content="https://kavya7439.github.io/kavya/assets/og.png">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="preload" href="vendor/three.min.js" as="script">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 
@@ -96,33 +97,14 @@
   </nav>
   <div id="progress" aria-hidden="true"><i></i></div>
 
-  <!-- engine-editor HUD: live prism telemetry -->
-  <div id="hudq" class="mono" aria-hidden="true">
-    <span class="hl">Prism Quaternion</span>
-    <span id="quat">.00 .00 .00 1.0</span>
-    <svg id="gizmo" viewBox="-40 -40 80 80">
-      <circle r="34" fill="none" />
-      <line id="gx1" x1="0" y1="0" x2="0" y2="0" class="gx" /><circle id="gx" r="4" class="gx" />
-      <line id="gy1" x1="0" y1="0" x2="0" y2="0" class="gy" /><circle id="gy" r="4" class="gy" />
-      <line id="gz1" x1="0" y1="0" x2="0" y2="0" class="gz" /><circle id="gz" r="4" class="gz" />
-    </svg>
-  </div>
-  <div id="hudm" class="mono" aria-hidden="true">
-    <span class="hl">Prism Material</span>
-    <span>roughness <b>0.14</b></span>
-    <span>ior <b>1.45</b></span>
-    <span>iridescence <b>1.00</b></span>
-    <span>transmission <b>1.00</b></span>
-  </div>
-  <span id="actname" class="mono" aria-hidden="true"></span>
   <div id="cursorlight" aria-hidden="true"></div>
 
   <p id="sr-live" class="sr-only" aria-live="polite"></p>
   <article id="doc" class="sr-only-until-fallback"></article>
 
   <script src="vendor/three.min.js"></script>
-  <script src="js/data.js?v=8"></script>
-  <script src="js/scene.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/data.js?v=9"></script>
+  <script src="js/scene.js?v=9"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

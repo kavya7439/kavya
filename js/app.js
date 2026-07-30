@@ -135,7 +135,9 @@
   /* the LED room: painted once, sits behind the typography */
   function paintRoom() {
     const rc = document.getElementById("room");
-    const w = (rc.width = innerWidth), h = (rc.height = innerHeight);
+    // fixed 2:1 canvas matching the 34×17 backdrop plane, so the
+    // LED tiles stay square on every screen (and painting is cheap)
+    const w = (rc.width = 1360), h = (rc.height = 680);
     const x = rc.getContext("2d");
     x.fillStyle = "#07070c"; x.fillRect(0, 0, w, h);
     const tile = Math.max(46, w / 26);
@@ -163,7 +165,7 @@
     bg2.addColorStop(0, "rgba(62,95,191,0.16)"); bg2.addColorStop(1, "transparent");
     x.fillStyle = bg2; x.fillRect(0, 0, w, h);
     const vg = x.createRadialGradient(w / 2, h / 2, h * 0.28, w / 2, h / 2, h * 0.95);
-    vg.addColorStop(0, "rgba(4,4,6,0.55)"); vg.addColorStop(1, "rgba(4,4,6,0.05)");
+    vg.addColorStop(0, "rgba(4,4,6,0.72)"); vg.addColorStop(1, "rgba(4,4,6,0.05)");
     x.fillStyle = vg; x.fillRect(0, 0, w, h);
   }
   let roomBase = null;
@@ -235,8 +237,10 @@
     hoverHue = (hoverHue + 47 + Math.random() * 130) % 360;
     hoverTiles.set(key, { tx, ty, hue: Math.round(hoverHue), life: 1.25 });
   });
+  let hoverFrame = 0;
   function paintHover(dt) {
     if (!hoverTiles.size || !roomBase) return;
+    if (hoverFrame++ % 2) return; // half-rate: texture uploads are the cost
     const rc = document.getElementById("room");
     const x = rc.getContext("2d");
     const tile = Math.max(46, rc.width / 26);
@@ -261,8 +265,10 @@
   }
 
   document.body.classList.add("webgl");
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.5 : 2));
+  const renderer = new THREE.WebGLRenderer({
+    canvas, antialias: !mobile, alpha: true, powerPreference: "high-performance",
+  });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.75));
   renderer.outputEncoding = THREE.sRGBEncoding;
   const scene = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
@@ -345,7 +351,6 @@
     if (a.key !== currentKey) {
       currentKey = a.key;
       document.body.dataset.act = a.key;
-      $("#actname").textContent = NAMES[a.key];
       $("#sr-live").textContent = NAMES[a.key];
     }
     $("#progress i").style.height = (p * 100).toFixed(1) + "%";
@@ -370,10 +375,7 @@
   document.fonts?.ready.then(() => PrismScene.drawWord(0.02, 1));
 
   /* ── loop ─────────────────────────────────────────────────── */
-  let pS = 0, t = 0, lastT = performance.now(), hudTick = 0;
-  const quatEl = $("#quat"),
-    gx = $("#gx"), gy = $("#gy"), gz = $("#gz"),
-    gx1 = $("#gx1"), gy1 = $("#gy1"), gz1 = $("#gz1");
+  let pS = 0, t = 0, lastT = performance.now();
   function progress() {
     const doc = document.body.scrollHeight - innerHeight;
     return doc > 0 ? clamp01(scrollY / doc) : 0;
@@ -386,7 +388,7 @@
     const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now;
     t += dt;
 
-    pS += (progress() - pS) * (reduced ? 1 : 1 - Math.exp(-6.5 * dt));
+    pS += (progress() - pS) * (reduced ? 1 : 1 - Math.exp(-8.5 * dt));
     paintHover(dt);
 
     // prism choreography: it never disappears, it travels
@@ -411,25 +413,6 @@
     const ringK = Math.min(ease(seg(pS, 0.075, 0.105)), 1 - ease(seg(pS, 0.52, 0.56)));
     const ci = Math.max(-1.7, Math.min(3.6, (pS - 0.205) / 0.09));
     PrismScene.setRing(-ci * 1.3, mobile ? ringK * 0.85 : ringK);
-
-    // engine HUD: live quaternion + axis gizmo
-    hudTick += dt;
-    if (hudTick > 0.12) {
-      hudTick = 0;
-      const q = g.quaternion;
-      quatEl.textContent = `${q.x.toFixed(2)} ${q.y.toFixed(2)} ${q.z.toFixed(2)} ${q.w.toFixed(2)}`;
-      const axes = [
-        [new THREE.Vector3(1, 0, 0), gx, gx1],
-        [new THREE.Vector3(0, 1, 0), gy, gy1],
-        [new THREE.Vector3(0, 0, 1), gz, gz1],
-      ];
-      for (const [v, dot, ln] of axes) {
-        v.applyQuaternion(q);
-        const sx = (v.x * 30).toFixed(1), sy = (-v.y * 30).toFixed(1);
-        dot.setAttribute("cx", sx); dot.setAttribute("cy", sy);
-        ln.setAttribute("x2", sx); ln.setAttribute("y2", sy);
-      }
-    }
 
     // liquid type decay
     dispScale *= Math.exp(-3 * dt);
@@ -485,7 +468,11 @@
     renderer.setSize(innerWidth, innerHeight);
     cam.aspect = innerWidth / innerHeight;
     cam.updateProjectionMatrix();
+    // fit the WebGL word to the viewport (word plane sits at z −1.7)
+    const visW = 2 * Math.tan(17 * Math.PI / 180) * 8.9 * cam.aspect;
+    PrismScene.setWordScale?.(Math.min(1.14, (visW * 0.94) / 5.42));
   }
+  if (mobile) PrismScene.configRing?.(0.48, 0);
   addEventListener("resize", resize);
   resize();
   frame();
