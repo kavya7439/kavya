@@ -9,9 +9,10 @@
    ============================================================ */
 
 const PrismScene = (() => {
+  const LITE = matchMedia("(max-width: 760px)").matches;
   let scene, prismGroup, prism, wire, frags = [], envRT, stars;
   let wordTex, wordPlane, wordCtx, glowTex, glowPlane, glowCtx, lastM = -1, lastF = -1;
-  let ring, panels = [], backdropTex;
+  let ring, panels = [], backdropTex, backdrop;
   const RSTEP = 1.3, RRAD = 6.4, RCZ = -6.8;
 
   /* bright violet/blue studio the glass refracts */
@@ -31,7 +32,7 @@ const PrismScene = (() => {
     mk(0x3e5fbf, 9, 11, [9, 0, 0], [0, -Math.PI / 2, 0]);
     mk(0xd9def0, 6, 7, [0, 0, -10], [0, 0, 0]);
     mk(0x14141e, 30, 30, [0, -6, 0], [-Math.PI / 2, 0, 0]);
-    envRT = new THREE.WebGLCubeRenderTarget(256);
+    envRT = new THREE.WebGLCubeRenderTarget(LITE ? 128 : 256);
     new THREE.CubeCamera(0.1, 100, envRT).update(renderer, envScene);
     return envRT.texture;
   }
@@ -134,7 +135,7 @@ const PrismScene = (() => {
     /* ── star specks ───────────────────────────────────────── */
     const starGeo = new THREE.BufferGeometry();
     const pts = [];
-    for (let i = 0; i < 220; i++) {
+    for (let i = 0; i < (LITE ? 110 : 220); i++) {
       pts.push((Math.random() - 0.5) * 22, (Math.random() - 0.5) * 13, -2 - Math.random() * 9);
     }
     starGeo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
@@ -208,7 +209,7 @@ const PrismScene = (() => {
        canvas becomes a texture, so the glass refracts the room */
     const roomCanvas = document.getElementById("room");
     backdropTex = new THREE.CanvasTexture(roomCanvas);
-    const backdrop = new THREE.Mesh(
+    backdrop = new THREE.Mesh(
       new THREE.PlaneGeometry(34, 17),
       new THREE.MeshBasicMaterial({ map: backdropTex, toneMapped: false })
     );
@@ -270,6 +271,10 @@ const PrismScene = (() => {
     glowTex.needsUpdate = true;
   }
   function setWordVisible(v) { wordPlane.visible = v; glowPlane.visible = v; }
+  function setIntro(k) {
+    if (backdrop) backdrop.material.color.setScalar(0.04 + 0.96 * k);
+    if (stars) stars.material.opacity = 0.55 * k;
+  }
   function setWordScale(sc) { wordPlane.scale.setScalar(sc); glowPlane.scale.setScalar(sc); }
   function configRing(sc, x) { ring.scale.setScalar(sc); ring.position.x = x; }
 
@@ -327,5 +332,5 @@ const PrismScene = (() => {
     wire.scale.setScalar(1 - k * 0.12);
   }
 
-  return { build, drawWord, setWordVisible, setWordScale, configRing, setRing, setSplit, updateBackdrop, group: () => prismGroup };
+  return { build, drawWord, setWordVisible, setWordScale, setIntro, configRing, setRing, setSplit, updateBackdrop, group: () => prismGroup };
 })();

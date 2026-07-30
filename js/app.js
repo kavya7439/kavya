@@ -103,10 +103,14 @@
     $("#cta .sub").textContent = DATA.cta.sub;
     $("#cta .mail").textContent = DATA.profile.email;
     $("#cta .mail").href = `mailto:${DATA.profile.email}?subject=${encodeURIComponent("Let's build something beautiful")}`;
+    if (DATA.profile.phone) $("#cta .mail").insertAdjacentHTML("afterend",
+      `<a class="mail tel" href="tel:${DATA.profile.phone.replace(/\s/g, "")}">${DATA.profile.phone}</a>`);
     $("#footer .final").textContent = DATA.footer.line;
     $$("#footer [data-mail]").forEach((a) => (a.href = `mailto:${DATA.profile.email}`));
     $$("#footer [data-li]").forEach((a) => (a.href = DATA.profile.linkedin));
     $$("#footer [data-gh]").forEach((a) => (a.href = DATA.profile.github));
+    if (DATA.profile.phone) $("#footer .flinks").insertAdjacentHTML("beforeend",
+      `<a href="tel:${DATA.profile.phone.replace(/\s/g, "")}">Call</a>`);
 
     // accessible document
     $("#doc").innerHTML = `
@@ -212,7 +216,7 @@
       x.globalAlpha = 1;
     }
     PrismScene.updateBackdrop?.();
-  }, 340);
+  }, mobile ? 520 : 340);
 
   /* hover: the LED tile under the cursor lights up, a new colour
      every tile. The room canvas shows through the WebGL backdrop
@@ -268,7 +272,7 @@
   const renderer = new THREE.WebGLRenderer({
     canvas, antialias: !mobile, alpha: true, powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.75));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1 : 1.75));
   renderer.outputEncoding = THREE.sRGBEncoding;
   const scene = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
@@ -364,10 +368,11 @@
 
   /* ── morph KAVYA → WORK, drawn inside WebGL so the glass
         genuinely refracts and magnifies the letters ─────────── */
-  function morph(p) {
-    const m = ease(seg(p, 0.08, 0.15));
+  function morph(p, iK = 1) {
+    // during boot the letters un-dissolve one by one (reverse morph)
+    const m = Math.max(ease(seg(p, 0.08, 0.15)), (1 - iK) * 0.95);
     // KAVYA hands over just before WORKS reaches the ring's front
-    const heroFade = 1 - ease(seg(p, 0.078, 0.112));
+    const heroFade = (1 - ease(seg(p, 0.078, 0.112))) * Math.min(1, 0.15 + iK * 1.2);
     PrismScene.drawWord(m, heroFade);
     PrismScene.setWordVisible(heroFade > 0.01);
     $("#worksub").style.opacity = m * heroFade;
@@ -376,6 +381,7 @@
 
   /* ── loop ─────────────────────────────────────────────────── */
   let pS = 0, t = 0, lastT = performance.now();
+  let introT = reduced ? 1 : -0.3; // small hold behind the loader
   function progress() {
     const doc = document.body.scrollHeight - innerHeight;
     return doc > 0 ? clamp01(scrollY / doc) : 0;
@@ -391,20 +397,31 @@
     pS += (progress() - pS) * (reduced ? 1 : 1 - Math.exp(-8.5 * dt));
     paintHover(dt);
 
+    // boot: dolly in while the room powers up; scrolling skips it
+    if (introT < 1) {
+      introT = Math.min(1, introT + dt / 2.2);
+      if (progress() > 0.012) introT = 1;
+      if (introT >= 1) document.body.classList.add("ready");
+    }
+    const iK = ease(clamp01(introT));
+    PrismScene.setIntro?.(iK);
+    cam.position.z = 7.2 + (1 - iK) * 3.4;
+    cam.position.y = (1 - iK) * 0.55;
+
     // prism choreography: it never disappears, it travels
     const g = prismGroup;
     g.position.x = (mobile ? 0 : track(PX, pS));
     g.position.y = track(PYY, pS) + Math.sin(t * 0.8) * 0.06;
     g.position.z = track(PZ, pS);
-    g.scale.setScalar(track(PSC, pS) * (mobile ? 0.78 : 1));
-    g.rotation.y = t * 0.22 + pS * 5.2 + mx * 0.18;
+    g.scale.setScalar(track(PSC, pS) * (mobile ? 0.78 : 1) * (0.22 + 0.78 * iK));
+    g.rotation.y = t * 0.22 + pS * 5.2 + mx * 0.18 + (1 - iK) * 2.8;
     g.rotation.x = 0.12 + my * 0.12 + Math.sin(t * 0.5) * 0.03;
 
     // fragments during the process act
     const split = Math.sin(ease(seg(pS, 0.68, 0.72)) * Math.PI / 2) * (1 - ease(seg(pS, 0.745, 0.78)));
     PrismScene.setSplit(reduced ? 0 : split, t);
 
-    morph(pS);
+    morph(pS, iK);
     const act = resolveAct(pS);
     setAct(act, pS);
 
@@ -475,6 +492,7 @@
   if (mobile) PrismScene.configRing?.(0.48, 0);
   addEventListener("resize", resize);
   resize();
+  if (reduced) document.body.classList.add("ready");
   frame();
   setTimeout(() => $("#loader").classList.add("done"), reduced ? 50 : 900);
 

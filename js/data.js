@@ -11,7 +11,8 @@ const DATA = {
 
   profile: {
     name: "Kavya Bahety",
-    email: "bahety.kavya2004@gmail.com",
+    email: "growthops@ssei.co.in",
+    phone: "+91 74399 99999",
     linkedin: "https://www.linkedin.com/in/kavya-bahety",
     github: "https://github.com/growthkavya",
     location: "Kolkata, India",
@@ -43,10 +44,7 @@ const DATA = {
       desc: "Our leads, ad spends and launches used to sit in ten different spreadsheets. Now one dashboard shows all of it, and the weekly team review runs on it.",
       accent: "#9BB8D4",
       image: "assets/p2.jpg",
-      links: [
-        { label: "See the preview", href: "https://kavya7439.github.io/growth-ops-preview/" },
-        { label: "Code", href: "https://github.com/growthkavya/growth-ops-dashboard" },
-      ],
+      links: [{ label: "See the preview", href: "https://kavya7439.github.io/growth-ops-preview/" }],
     },
     {
       num: "03",
