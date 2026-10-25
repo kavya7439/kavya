@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KAVYA — Creating experiences that are remembered</title>
-  <meta name="description" content="Kavya Bahety. An immersive portfolio built around a glass prism: selected work, philosophy, process and contact.">
+  <meta name="description" content="Kavya Bahety, 21, Kolkata. Growth Ops and AI Manager who directs AI to ship real products. Six live things, one glass prism.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;500;800&family=IBM+Plex+Mono:wght@400&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
   <meta property="og:description" content="Creating experiences that are remembered long after they're seen.">
   <meta property="og:image" content="https://kavya7439.github.io/kavya/assets/og.png">
   <link rel="preload" href="vendor/three.min.js" as="script">
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
 
@@ -61,18 +61,19 @@
     <section class="act" id="philo"><p class="big-serif"></p><p class="sub"></p></section>
 
     <!-- about -->
-    <section class="act side" id="about"><h2></h2><p class="meta mono"></p><div class="lines"></div></section>
+    <section class="act side" id="about">
+      <figure class="me"><img alt="Kavya Bahety"><figcaption class="mono"></figcaption></figure>
+      <div class="about-text"><h2></h2><p class="meta mono"></p><div class="lines"></div></div>
+    </section>
 
     <!-- process -->
     <section class="act" id="process"><div class="pwords"></div><p class="sub"></p></section>
-
-    <!-- achievements -->
-    <section class="act side" id="achieve"><p class="mono actlabel">Verified</p><div class="rows"></div></section>
 
     <!-- cta -->
     <section class="act" id="cta">
       <h2></h2><p class="sub"></p>
       <a class="mail" href="#"></a>
+      <div class="cta-links"></div>
     </section>
 
     <!-- footer -->
@@ -89,11 +90,10 @@
   </div>
 
   <!-- chrome -->
-  <header id="brand" class="mono">KAVYA</header>
-  <nav id="topnav" class="mono" aria-label="Navigation">
-    <a href="#" data-jump="0.205">Work</a>
-    <a href="#" data-jump="0.64">About</a>
-    <a href="#" data-jump="0.90" class="pill">Contact</a>
+  <nav id="topnav" aria-label="Navigation">
+    <a href="#" data-jump="0.1625" data-nav="work"></a>
+    <a href="#" data-jump="0.66" data-nav="about"></a>
+    <a href="#" data-jump="0.87" class="pill" data-nav="contact"></a>
   </nav>
   <div id="progress" aria-hidden="true"><i></i></div>
 
@@ -103,8 +103,8 @@
   <article id="doc" class="sr-only-until-fallback"></article>
 
   <script src="vendor/three.min.js"></script>
-  <script src="js/data.js?v=11"></script>
-  <script src="js/scene.js?v=11"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/data.js?v=12"></script>
+  <script src="js/scene.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
 </body>
 </html>

@@ -1,5 +1,12 @@
-# KAVYA — the prism
+# KAVYA — the prism (portfolio)
 
-An immersive portfolio built around an inverted glass prism: KAVYA morphs into WORK, the prism travels through selected work, philosophy, process and contact.
+Live: https://kavya7439.github.io/kavya/  (repo kavya7439/kavya, Pages from main)
 
-Static site, vanilla Three.js (vendored). Open index.html or deploy the folder as-is. Edit all content in js/data.js. Drop project images at assets/ and set image paths in data.
+- `js/data.js`   all copy, links, projects (p1–p6), photo path. Edit here first.
+- `js/app.js`    scroll film: acts are derived from the project count; no snap-back on scroll.
+- `js/scene.js`  three.js prism, WebGL word, project ring (only near panels render).
+- `assets/`      p1–p6 tall captures, kavya.jpg (About photo), og.png.
+
+v12 (25 Oct 2026): six projects, About photo card, readable nav, personal email, Verified act removed,
+snap-back removed (mouse wheel felt stuck), prism parks right on About, accent colour per project.
+Bump `?v=` in index.html on every deploy.

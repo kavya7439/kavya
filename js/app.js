@@ -16,25 +16,21 @@
   const ease = (t) => t * t * (3 - 2 * t);
 
   /* ── acts ─────────────────────────────────────────────────── */
+  const W0 = 0.13, WSTEP = 0.065;
   const ACTS = [
-    { key: "hero", from: 0.00, to: 0.08 },
-    { key: "morph", from: 0.08, to: 0.16 },
-    { key: "w0", from: 0.16, to: 0.25, project: 0 },
-    { key: "w1", from: 0.25, to: 0.34, project: 1 },
-    { key: "w2", from: 0.34, to: 0.43, project: 2 },
-    { key: "w3", from: 0.43, to: 0.52, project: 3 },
+    { key: "hero", from: 0.00, to: 0.07 },
+    { key: "morph", from: 0.07, to: W0 },
+    ...DATA.projects.map((_, i) => ({ key: "w" + i, from: W0 + i * WSTEP, to: W0 + (i + 1) * WSTEP, project: i })),
     { key: "philosophy", from: 0.52, to: 0.60 },
-    { key: "about", from: 0.60, to: 0.68 },
-    { key: "process", from: 0.68, to: 0.78 },
-    { key: "achieve", from: 0.78, to: 0.86 },
-    { key: "cta", from: 0.86, to: 0.94 },
-    { key: "footer", from: 0.94, to: 1.001 },
+    { key: "about", from: 0.60, to: 0.72 },
+    { key: "process", from: 0.72, to: 0.82 },
+    { key: "cta", from: 0.82, to: 0.92 },
+    { key: "footer", from: 0.92, to: 1.001 },
   ];
-  const NAMES = {
-    hero: "Kavya", morph: "Work", w0: "Work 01", w1: "Work 02", w2: "Work 03", w3: "Work 04",
-    philosophy: "Philosophy", about: "About", process: "Process", achieve: "Achievements",
+  const NAMES = Object.assign({
+    hero: "Kavya", morph: "Work", philosophy: "Philosophy", about: "About", process: "Process",
     cta: "Contact", footer: "Kavya",
-  };
+  }, ...DATA.projects.map((pr, i) => ({ ["w" + i]: "Work " + pr.num })));
   const resolveAct = (p) => ACTS.find((a) => p >= a.from && p < a.to) || ACTS[ACTS.length - 1];
 
   /* keyframe track helper */
@@ -47,12 +43,13 @@
     return keys[keys.length - 1][1];
   }
   // prism position x, scale, y across the whole journey
-  const PX = [[0, 0], [0.16, 0], [0.545, 0], [0.60, 0], [0.63, -2.2], [0.67, -2.2], [0.71, 0], [0.80, 2.2], [0.845, 2.2], [0.88, 0], [1, 0]];
+  // about: text sits left, so the prism travels right and stays clear of it
+  const PX = [[0, 0], [0.16, 0], [0.545, 0], [0.60, 0], [0.63, 2.3], [0.70, 2.3], [0.745, 0], [1, 0]];
   // prism retreats early so WORKS makes its front pass IN FRONT
   // of the glass, exactly like the project panels after it
   const PZ = [[0, 0], [0.085, 0], [0.13, -4.6], [0.50, -4.6], [0.56, 0], [1, 0]];
-  const PSC = [[0, 0.86], [0.10, 0.86], [0.18, 0.9], [0.50, 0.9], [0.56, 1.05], [0.62, 0.55], [0.70, 0.9], [0.80, 0.5], [0.87, 0.62], [0.95, 0.5], [1, 0.5]];
-  const PYY = [[0, 0], [0.86, 0], [0.90, 0.35], [0.94, 0.55], [1, 0.7]];
+  const PSC = [[0, 0.86], [0.10, 0.86], [0.18, 0.9], [0.50, 0.9], [0.56, 1.05], [0.62, 0.55], [0.70, 0.55], [0.75, 0.9], [0.83, 0.6], [0.92, 0.5], [1, 0.5]];
+  const PYY = [[0, 0], [0.82, 0], [0.87, 0.35], [0.92, 0.55], [1, 0.7]];
 
   /* ── DOM build ────────────────────────────────────────────── */
   function chars(word, gapAfter) {
@@ -90,6 +87,10 @@
       wrap.appendChild(card);
     });
 
+    $$("#topnav [data-nav]").forEach((a) => (a.textContent = DATA.nav[a.dataset.nav]));
+    $("#about .me img").src = DATA.profile.photo;
+    $("#about .me figcaption").textContent = DATA.about.stamp;
+    $("#about .me img").addEventListener("error", () => $("#about").classList.add("nophoto"));
     $("#philo .big-serif").textContent = DATA.philosophy.line;
     $("#philo .sub").textContent = DATA.philosophy.sub;
     $("#about h2").textContent = DATA.about.name;
@@ -97,14 +98,14 @@
     $("#about .lines").innerHTML = DATA.about.lines.map((l) => `<p>${fmt(l)}</p>`).join("");
     $("#process .pwords").innerHTML = DATA.process.map((w, i) => `<span class="pw" style="--d:${i * 90}ms">${w}</span>`).join("");
     $("#process .sub").textContent = DATA.processLine;
-    $("#achieve .rows").innerHTML = DATA.achievements.map((a) =>
-      `<div class="arow"><span class="an">${fmt(a.n)}</span><span class="al">${fmt(a.label)}</span></div>`).join("");
     $("#cta h2").textContent = DATA.cta.line;
     $("#cta .sub").textContent = DATA.cta.sub;
     $("#cta .mail").textContent = DATA.profile.email;
     $("#cta .mail").href = `mailto:${DATA.profile.email}?subject=${encodeURIComponent("Let's build something beautiful")}`;
-    if (DATA.profile.phone) $("#cta .mail").insertAdjacentHTML("afterend",
-      `<a class="mail tel" href="tel:${DATA.profile.phone.replace(/\s/g, "")}">${DATA.profile.phone}</a>`);
+    $("#cta .cta-links").innerHTML = [
+      DATA.profile.phone ? `<a href="tel:${DATA.profile.phone.replace(/\s/g, "")}">${DATA.profile.phone}</a>` : "",
+      `<a href="${DATA.profile.linkedin}" target="_blank" rel="noopener">${DATA.cta.linkedin} ↗</a>`,
+    ].join("");
     $("#footer .final").textContent = DATA.footer.line;
     $$("#footer [data-mail]").forEach((a) => (a.href = `mailto:${DATA.profile.email}`));
     $$("#footer [data-li]").forEach((a) => (a.href = DATA.profile.linkedin));
@@ -119,7 +120,8 @@
       ${DATA.projects.map((pr) => `
         <article><h2>${pr.num} · ${pr.title}</h2><p>${pr.category}</p><p>${pr.desc}</p>
         ${pr.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join(" · ")}</article>`).join("")}
-      <h2>Process</h2><p>${DATA.process.join(" → ")}. ${DATA.processLine}</p>
+      <h2>About</h2><p>${DATA.about.meta}</p>
+      <h2>Process</h2><p>${DATA.process.join(", ")}. ${DATA.processLine}</p>
       <h2 id="doc-contact">${DATA.cta.line}</h2>
       <p><a href="mailto:${DATA.profile.email}">${DATA.profile.email}</a> ·
          <a href="${DATA.profile.linkedin}">LinkedIn</a> · <a href="${DATA.profile.github}">GitHub</a></p>`;
@@ -185,7 +187,7 @@
   // LED ticker: tiles flicker with project names and fragments
   const LEDWORDS = [
     ...DATA.projects.map((p) => p.title.split(" ")[0].toUpperCase()),
-    "KAVYA", "GROWTH OPS", "CRM", "UTM", "BUILD", "SHIP", "AI", "KOLKATA", "2026", "LIVE",
+    "KAVYA", "GROWTH OPS", "CRM", "UTM", "BUILD", "BREAK", "SHIP", "AI", "KOLKATA", "2026", "LIVE", "HELLO",
   ];
   if (!reduced) setInterval(() => {
     if (document.hidden || !roomBase) return;
@@ -361,8 +363,10 @@
     // active project card
     if (a.project != null) {
       $$(".pcard").forEach((c) => c.classList.toggle("on", +c.dataset.idx === a.project));
+      document.documentElement.style.setProperty("--accent", DATA.projects[a.project].accent);
     } else {
       $$(".pcard").forEach((c) => c.classList.remove("on"));
+      document.documentElement.style.setProperty("--accent", "#9FB4E8");
     }
   }
 
@@ -381,7 +385,7 @@
 
   /* ── loop ─────────────────────────────────────────────────── */
   let pS = 0, t = 0, lastT = performance.now();
-  let introT = reduced ? 1 : -0.3; // small hold behind the loader
+  let introT = reduced ? 1 : -0.12; // small hold behind the loader
   function progress() {
     const doc = document.body.scrollHeight - innerHeight;
     return doc > 0 ? clamp01(scrollY / doc) : 0;
@@ -399,7 +403,7 @@
 
     // boot: dolly in while the room powers up; scrolling skips it
     if (introT < 1) {
-      introT = Math.min(1, introT + dt / 2.2);
+      introT = Math.min(1, introT + dt / 1.5);
       if (progress() > 0.012) introT = 1;
       if (introT >= 1) document.body.classList.add("ready");
     }
@@ -418,7 +422,7 @@
     g.rotation.x = 0.12 + my * 0.12 + Math.sin(t * 0.5) * 0.03;
 
     // fragments during the process act
-    const split = Math.sin(ease(seg(pS, 0.68, 0.72)) * Math.PI / 2) * (1 - ease(seg(pS, 0.745, 0.78)));
+    const split = Math.sin(ease(seg(pS, 0.72, 0.76)) * Math.PI / 2) * (1 - ease(seg(pS, 0.79, 0.82)));
     PrismScene.setSplit(reduced ? 0 : split, t);
 
     morph(pS, iK);
@@ -428,8 +432,8 @@
     // the project globe: WORKS revolves in first (slot -1),
     // then each project rests centred at its act's centre
     const ringK = Math.min(ease(seg(pS, 0.075, 0.105)), 1 - ease(seg(pS, 0.52, 0.56)));
-    const ci = Math.max(-1.7, Math.min(3.6, (pS - 0.205) / 0.09));
-    PrismScene.setRing(-ci * 1.3, mobile ? ringK * 0.85 : ringK);
+    const ci = Math.max(-1.7, Math.min(DATA.projects.length - 0.4, (pS - (W0 + WSTEP / 2)) / WSTEP));
+    PrismScene.setRing(-ci * 1.3, mobile ? ringK * 0.85 : ringK, ci);
 
     // liquid type decay
     dispScale *= Math.exp(-3 * dt);
@@ -456,16 +460,8 @@
   }
   ["wheel", "touchstart", "keydown"].forEach((ev) =>
     addEventListener(ev, () => cancelAnimationFrame(snapRAF), { passive: true }));
-  addEventListener("scroll", () => {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      if (reduced) return;
-      const p = progress();
-      let best = CENTERS[0];
-      for (const c of CENTERS) if (Math.abs(c - p) < Math.abs(best - p)) best = c;
-      if (Math.abs(best - p) > 0.004 && Math.abs(best - p) < 0.05) tweenScrollTo(best);
-    }, 190);
-  }, { passive: true });
+  // no snap-back on scroll: a mouse wheel moves in steps, and pulling the
+  // page back to an act centre between steps is what felt "stuck"
 
   /* keyboard: arrows step acts */
   addEventListener("keydown", (e) => {
@@ -494,7 +490,7 @@
   resize();
   if (reduced) document.body.classList.add("ready");
   frame();
-  setTimeout(() => $("#loader").classList.add("done"), reduced ? 50 : 900);
+  setTimeout(() => $("#loader").classList.add("done"), reduced ? 50 : 600);
 
   console.log("%cCreating experiences that are remembered.", "color:#9fb4e8;font-weight:bold");
   console.log("Say hi: " + DATA.profile.email);

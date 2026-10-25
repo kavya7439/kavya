@@ -279,7 +279,7 @@ const PrismScene = (() => {
   function configRing(sc, x) { ring.scale.setScalar(sc); ring.position.x = x; }
 
   /* the globe: angle spins the ring, facing panels glow */
-  function setRing(angle, k) {
+  function setRing(angle, k, ci = 0) {
     ring.visible = k > 0.02;
     if (!ring.visible) return;
     const now = performance.now() / 1000;
@@ -288,7 +288,12 @@ const PrismScene = (() => {
       p.position.set(Math.sin(a) * RRAD, Math.sin(a * 2) * 0.04, Math.cos(a) * RRAD);
       p.rotation.y = a;
       const facing = Math.max(0, Math.cos(a));
-      p.material.opacity = k * (0.08 + 0.92 * facing * facing * facing);
+      // only the current panel and its neighbours exist; with six
+      // projects the ring wraps, and a far slot would otherwise ghost
+      // in behind the front one
+      const near = Math.max(0, Math.min(1, 1 - (Math.abs(p.userData.slot - ci) - 1.05) / 0.5));
+      p.visible = near > 0.01;
+      p.material.opacity = k * near * (0.08 + 0.92 * facing * facing * facing);
       const sc = p.userData.scroll;
       if (sc) {
         // ping-pong through the tall capture, like a screen recording
