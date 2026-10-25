@@ -2,7 +2,7 @@
    KAVYA — THE PRISM · content
    ============================================================
    EDIT HERE. All copy and links. Plain language, Kavya's voice.
-   Project images: assets/p1.jpg … p6.jpg (tall captures scroll
+   Project images: assets/p1.jpg … p4.jpg (tall captures scroll
    inside the panels like screen recordings).
    Photo: assets/kavya.jpg (About act).
    ============================================================ */
@@ -42,48 +42,30 @@ const DATA = {
     },
     {
       num: "02",
-      title: "Growth Ops Dashboard",
-      category: "Live dashboard · Built with AI",
-      desc: "Leads, ad spend and launches lived in ten spreadsheets. Now they live on one screen, and the Monday team review runs on it instead of on memory.",
-      accent: "#9BB8D4",
-      image: "assets/p2.jpg",
-      links: [{ label: "See the preview", href: "https://kavya7439.github.io/growth-ops-preview/" }],
-    },
-    {
-      num: "03",
-      title: "Intern Team CRM",
-      category: "Team tool · Opened every working day",
-      desc: "Attendance, tasks, handoffs, one place. The intern team has opened it every working day since it shipped. A tool nobody opens is a spreadsheet with better fonts.",
-      accent: "#8FD0B2",
-      image: "assets/p3.jpg",
-      links: [{ label: "See the preview", href: "https://kavya7439.github.io/intern-crm-preview/" }],
-    },
-    {
-      num: "04",
       title: "UTM Attribution Dashboard",
-      category: "Marketing analytics",
+      category: "Marketing analytics · Live",
       desc: "Which ad, post or search actually brought this student in? Before, a shrug. Now, an answer, for every sign-up on the new website.",
       accent: "#C9CDD6",
       image: "assets/p4.jpg",
       links: [{ label: "Open the spec", href: "https://kavya7439.github.io/utm-attribution-dashboard/" }],
     },
     {
-      num: "05",
-      title: "Finance Readiness Compass",
-      category: "Student diagnostic · Live",
-      desc: "Five minutes of questions, then a map: which finance role fits you and what you're missing for it. Feels like a career quiz, works like an assessment.",
-      accent: "#F2C17D",
-      image: "assets/p5.jpg",
-      links: [{ label: "Try it", href: "https://growthkavya.github.io/growth-ops-dashboard/finance-readiness/" }],
+      num: "03",
+      title: "Barely Chartered",
+      category: "Brand site · Side project · Still cooking",
+      desc: "A CFA Level 1 brand that talks like a person, not an institute. The site opens as a results email, then becomes the pitch. Built as a demo; the brand is still being shaped.",
+      accent: "#D4FF3F",
+      image: "assets/p3.jpg",
+      links: [{ label: "See the demo", href: "barely-chartered/" }],
     },
     {
-      num: "06",
-      title: "The Analyst Arena",
-      category: "Campaign landing page · Own domain",
-      desc: "A campus equity-research challenge needed a home. Registration, rules, countdown and the email automation behind it, built in a week on its own domain.",
-      accent: "#E39BB0",
-      image: "assets/p6.jpg",
-      links: [{ label: "Visit live", href: "https://analyst-arena.ssei.co.in/" }],
+      num: "04",
+      title: "Growth Ops Dashboard",
+      category: "Team operating system · Live, behind a login",
+      desc: "Leads, ad spend, launches, interns, student lifecycle: it lived in ten spreadsheets. Now it is one system the Monday review runs on. The tour shows the shape; the sample workspace shows the feel.",
+      accent: "#9BB8D4",
+      image: "assets/p2.jpg",
+      links: [{ label: "Take the tour", href: "growth-ops/" }, { label: "Sample workspace", href: "https://kavya7439.github.io/growth-ops-preview/" }],
     },
   ],
 

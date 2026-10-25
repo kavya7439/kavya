@@ -16,7 +16,7 @@
   const ease = (t) => t * t * (3 - 2 * t);
 
   /* ── acts ─────────────────────────────────────────────────── */
-  const W0 = 0.13, WSTEP = 0.065;
+  const W0 = 0.13, WSTEP = (0.52 - W0) / DATA.projects.length;
   const ACTS = [
     { key: "hero", from: 0.00, to: 0.07 },
     { key: "morph", from: 0.07, to: W0 },
@@ -187,7 +187,7 @@
   // LED ticker: tiles flicker with project names and fragments
   const LEDWORDS = [
     ...DATA.projects.map((p) => p.title.split(" ")[0].toUpperCase()),
-    "KAVYA", "GROWTH OPS", "CRM", "UTM", "BUILD", "BREAK", "SHIP", "AI", "KOLKATA", "2026", "LIVE", "HELLO",
+    "KAVYA", "GROWTH OPS", "UTM", "CFA", "BUILD", "BREAK", "SHIP", "AI", "KOLKATA", "2026", "LIVE", "HELLO",
   ];
   if (!reduced) setInterval(() => {
     if (document.hidden || !roomBase) return;

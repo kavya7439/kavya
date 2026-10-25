@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growth Ops Dashboard, a tour</title>
+<meta name="description" content="How Kavya Bahety turned ten spreadsheets into one operating system for a growth team: modules, screens, and how it is built.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;500;800&family=IBM+Plex+Mono:wght@400&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070c;--ink:#F2F3F5;--soft:rgba(242,243,245,.6);--hair:rgba(242,243,245,.1);--blue:#9FB4E8;--acc:#9BB8D4;--font:"Archivo",system-ui,sans-serif;--mono:"IBM Plex Mono",monospace;--serif:"Instrument Serif",Georgia,serif;--pad:clamp(1.4rem,4vw,4rem)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 45% at 50% 0%,rgba(159,180,232,.08),transparent 70%),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:auto,52px 52px,52px 52px}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono);font-size:.64rem;letter-spacing:.26em;text-transform:uppercase;color:var(--blue)}
+main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 var(--pad) 6rem}
+header.top{display:flex;justify-content:space-between;align-items:center;padding:1.4rem 0;font-size:.9rem}
+header.top a{opacity:.75}header.top a:hover{opacity:1;color:var(--blue)}
+.hero{padding:6vh 0 4rem;max-width:46rem}
+h1{font-weight:800;letter-spacing:-.03em;font-size:clamp(2.4rem,6vw,4.4rem);line-height:1;margin:.9rem 0 1.2rem}
+.lede{font-weight:300;font-size:clamp(1.05rem,1.8vw,1.3rem);opacity:.85;max-width:40rem}
+.lede em{font-family:var(--serif);font-style:italic;font-size:1.1em}
+.row{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.8rem}
+.btn{border:1px solid rgba(242,243,245,.35);border-radius:999px;padding:.6em 1.3em;font-size:.9rem;transition:.3s}
+.btn:hover{background:var(--acc);border-color:var(--acc);color:#05050a}
+.btn.ghost{border-color:var(--hair);opacity:.8}
+section{padding:3.5rem 0;border-top:1px solid var(--hair)}
+h2{font-weight:800;letter-spacing:-.02em;font-size:clamp(1.6rem,3.4vw,2.4rem);margin:.6rem 0 1.4rem}
+.before{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.card{border:1px solid var(--hair);border-radius:10px;padding:1.4rem;background:rgba(255,255,255,.02)}
+.card h3{font-weight:500;font-size:1.05rem;margin:.3rem 0 .6rem}
+.card p,.card li{font-weight:300;opacity:.82;font-size:.95rem}
+.card ul{padding-left:1.1rem}
+.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.mod{border:1px solid var(--hair);border-radius:10px;padding:1.3rem;background:rgba(255,255,255,.02);position:relative;overflow:hidden;transition:transform .4s,border-color .4s}
+.mod:hover{transform:translateY(-3px);border-color:rgba(159,180,232,.45)}
+.mod::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c,var(--blue))}
+.mod .mono{color:var(--c,var(--blue))}
+.mod h3{font-weight:500;font-size:1.05rem;margin:.5rem 0 .5rem}
+.mod p{font-weight:300;opacity:.8;font-size:.92rem}
+.mod .st{display:inline-block;margin-top:.9rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+.shots{display:grid;gap:1.6rem}
+figure{margin:0}
+figure img{width:100%;display:block;border-radius:10px;border:1px solid var(--hair);box-shadow:0 30px 60px -30px #000}
+figcaption{margin-top:.7rem;font-size:.9rem;font-weight:300;opacity:.75;max-width:60ch}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem}
+.how{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.how div{border-top:1px solid var(--hair);padding-top:.9rem}
+.how b{display:block;font-weight:500;margin-bottom:.3rem}
+.how span{font-weight:300;opacity:.75;font-size:.92rem}
+.note{border-left:3px solid var(--blue);padding:.9rem 1.2rem;background:rgba(159,180,232,.06);border-radius:0 8px 8px 0;font-weight:300;opacity:.9;max-width:62ch}
+footer{padding-top:3rem;border-top:1px solid var(--hair);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:.85rem;opacity:.7}
+@media(max-width:820px){.before,.two,.modules{grid-template-columns:1fr}.how{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><a href="../">← Back to the prism</a><span class="mono">Growth Ops · a tour</span></header>
+
+  <div class="hero">
+    <p class="mono">Built and run by Kavya Bahety · SSEI growth team · 2026</p>
+    <h1>Ten spreadsheets became one operating system.</h1>
+    <p class="lede">Leads, ad spend, launches, interns, students. Each lived in its own file, in someone's head, or in a chat thread nobody could find on Monday. Now the whole growth team runs on one system, and the weekly review is run <em>from</em> it, not <em>about</em> it.</p>
+    <div class="row">
+      <a class="btn" href="https://kavya7439.github.io/growth-ops-preview/" target="_blank" rel="noopener">Open the sample workspace ↗</a>
+      <a class="btn ghost" href="https://growthkavya.github.io/growth-ops-dashboard/lifecycle/" target="_blank" rel="noopener">Read the lifecycle explainer ↗</a>
+    </div>
+  </div>
+
+  <section>
+    <p class="mono">Before and after</p>
+    <h2>What changed on a Monday morning.</h2>
+    <div class="before">
+      <div class="card"><h3>Before</h3><ul>
+        <li>"Which sheet is the latest?" opened every review.</li>
+        <li>Ad spend in one file, leads in another, nobody joined them.</li>
+        <li>Intern attendance on WhatsApp, tasks on memory.</li>
+        <li>A lead and a paying student were two lists that never met.</li>
+        <li>Campaign results arrived as screenshots, weeks late.</li></ul></div>
+      <div class="card"><h3>After</h3><ul>
+        <li>One workspace: goals, scorecards, delegations, launch tracker.</li>
+        <li>Spend and leads on the same screen, cost per lead live.</li>
+        <li>Interns mark attendance, pick tasks and log KPIs in one tool, daily.</li>
+        <li>Leads and students share one record, one priority queue.</li>
+        <li>Campaign returns refresh themselves every evening at five.</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="mono">The modules</p>
+    <h2>Seven pieces that talk to each other.</h2>
+    <div class="modules">
+      <div class="mod" style="--c:#7AA2FF"><span class="mono">01</span><h3>Team workspace</h3><p>Goals, scorecards and delegations for the growth team. The Monday review runs on this screen.</p><span class="st">Live · behind login</span></div>
+      <div class="mod" style="--c:#8FD0B2"><span class="mono">02</span><h3>Growth Lab</h3><p>The intern programme's home: attendance, task board, KPI log, every working day.</p><span class="st">Live · behind login</span></div>
+      <div class="mod" style="--c:#F2C17D"><span class="mono">03</span><h3>Lifecycle system</h3><p>One person, one phone number, one record from first form to last exam. Twelve lead playbooks, twelve student playbooks, one priority queue.</p><span class="st">Live · public explainer</span></div>
+      <div class="mod" style="--c:#E39BB0"><span class="mono">04</span><h3>Campaign Signal</h3><p>What each WhatsApp campaign actually returned, matched to payments, refreshed daily by a 5 pm job. Leadership reads it, nobody compiles it.</p><span class="st">Live · private link</span></div>
+      <div class="mod" style="--c:#C9CDD6"><span class="mono">05</span><h3>UTM attribution</h3><p>Which ad, post or search brought each sign-up on the new website. The spec is public.</p><span class="st">Live · <a href="https://kavya7439.github.io/utm-attribution-dashboard/" target="_blank" rel="noopener" style="text-decoration:underline">spec ↗</a></span></div>
+      <div class="mod" style="--c:#B9A2FF"><span class="mono">06</span><h3>Decision reports</h3><p>A growing shelf: campaign ROI, outdoor-media research, a student skills diagnostic, lead-system audits. Each one a page, not a deck.</p><span class="st">Rolling</span></div>
+      <div class="mod" style="--c:#9BB8D4"><span class="mono">07</span><h3>The plumbing</h3><p>One database, row-level security, a private loader for anything sensitive, nightly jobs. The public repo holds only the shape, never the numbers.</p><span class="st">Always on</span></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="mono">Screens</p>
+    <h2>What it looks like.</h2>
+    <div class="shots">
+      <figure><img src="img/workspace-metrics.jpg" alt="Workspace metrics: leads this month, ad spend, cost per lead, launches shipped, with charts of leads per week and spend by channel"><figcaption>The top of the workspace, shown here with sample data: the four numbers the team opens with, leads per week, and where the month's spend went.</figcaption></figure>
+      <div class="two">
+        <figure><img src="img/workspace-tracker.jpg" alt="Launch tracker with owners, dates and status, beside a masked latest-leads table"><figcaption>Launch tracker beside the latest leads. Every launch has an owner, a date and an honest status: shipped, on track, needs a decision.</figcaption></figure>
+        <figure><img src="img/lifecycle-top.jpg" alt="The lifecycle system explainer: sidebar of modules, title and introduction"><figcaption>The lifecycle system's public explainer. Forty checks, nine dimensions, a data dictionary of seventy-six fields, written so a new hire can read it in an hour.</figcaption></figure>
+      </div>
+    </div>
+    <p class="note" style="margin-top:1.6rem">The real screens carry real revenue, lead and staff numbers, so they stay behind the team login. The sample workspace uses invented data with the same layout, which is the honest way to show it.</p>
+  </section>
+
+  <section>
+    <p class="mono">How it is built</p>
+    <h2>No framework, no build step, no engineering team.</h2>
+    <div class="how">
+      <div><b>Plain HTML and JavaScript</b><span>Every page is a file you can open. Nothing to install, nothing to compile.</span></div>
+      <div><b>One database</b><span>Supabase holds everything; row-level security decides who sees what, on the server, not in the page.</span></div>
+      <div><b>GitHub Pages</b><span>The site ships on a git push. The repo is public and holds the shape only; data goes in through a private loader.</span></div>
+      <div><b>Directed with AI</b><span>I break the problem down, brief the models, break what comes back, ship what survives. Idea to working screen in days.</span></div>
+    </div>
+  </section>
+
+  <footer><span>Kavya Bahety · Kolkata · <a href="mailto:bahety.kavya2004@gmail.com" style="text-decoration:underline">bahety.kavya2004@gmail.com</a></span><a href="../">← Back to the prism</a></footer>
+</main>
+</body>
+</html>

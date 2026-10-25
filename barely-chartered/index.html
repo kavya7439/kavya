@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <title>barely chartered, cleared CFA L1 with 1760, now the coach you couldn't afford</title>
+  <meta name="description" content="Chirag Joshi cleared CFA Level I in November 2025 with 1760, top band. Now giving Level II and coaching the next batch through L1: daily breakdowns, strategy calls, flashnotes." />
+
+  <!-- OG / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="barely chartered, the cheatcode for CFA L1" />
+  <meta property="og:description" content="Cleared L1 with 1760. Now I'm the coach you couldn't afford." />
+  <meta property="og:image" content="assets/cfa-report-card.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- favicon as inline SVG -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23000'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-weight='600' font-size='14' fill='%23D4FF3F' letter-spacing='-2'%3Ebc%3C/text%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <a href="#top" class="skip-link">Skip to content</a>
+  <div class="cursor-light" id="cursorLight" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <!-- ============================================
+       INTRO — the email from CFA Institute
+       ============================================ -->
+  <div class="intro" id="intro" role="dialog" aria-label="Open the email from CFA Institute to enter the site">
+    <div class="intro-flash" id="introFlash" aria-hidden="true"></div>
+
+    <div class="intro-inbox">
+      <div class="intro-notif">
+        <span class="intro-notif-dot"></span>
+        <span>1 new message &middot; results are out</span>
+      </div>
+
+      <div class="intro-env" id="introEnv" role="button" tabindex="0" aria-label="Open your CFA Level I results">
+        <!-- the letter rises out on open -->
+        <div class="ienv-letter" aria-hidden="true">
+          <div class="ienv-letter-from">CFA Institute &middot; Charlottesville VA</div>
+          <div class="ienv-letter-re">Your CFA&reg; Program Level I Results</div>
+          <div class="ienv-result">
+            <span class="ienv-result-label">Result</span>
+            <span class="ienv-result-val">PASSED</span>
+          </div>
+          <div class="ienv-score"><span class="ienv-score-num">1760</span><span class="ienv-score-cap">/ 1900 &middot; top band</span></div>
+        </div>
+
+        <!-- flap -->
+        <div class="ienv-flap" aria-hidden="true">
+          <div class="ienv-seal">CFA</div>
+        </div>
+
+        <!-- front face -->
+        <div class="ienv-body">
+          <div class="ienv-stamp"><span>CFA</span><span class="ienv-stamp-sub">NOV&middot;25</span></div>
+          <div class="ienv-from">
+            <div class="ienv-lbl">From</div>
+            <div class="ienv-name">CFA Institute</div>
+          </div>
+          <div class="ienv-sub">RE: Your November 2025 Level I Results</div>
+        </div>
+      </div>
+
+      <button class="intro-open" id="introOpen" type="button">
+        <span class="intro-open-ring" aria-hidden="true"></span>
+        Open the email &rarr;
+      </button>
+    </div>
+
+    <div class="intro-hint">
+      <span class="hint-arrow">&darr;</span>
+      <span>open the email. or press <kbd>&crarr;</kbd>.</span>
+    </div>
+  </div>
+
+  <!-- ============================================
+       MPS RAIL — left side, drop falling, 1000 → 1900
+       ============================================ -->
+  <aside class="mps-rail" id="mpsRail" aria-hidden="true">
+    <div class="mps-scale">
+      <!-- ticks positioned absolutely by data-pct (matches actual numerical position) -->
+      <div class="mps-tick mps-tick-top" data-score="1000" style="top: 0%;">
+        <span class="mps-num">1000</span>
+        <span class="mps-line"></span>
+      </div>
+      <div class="mps-tick" data-score="1200" style="top: 22.2%;">
+        <span class="mps-num">1200</span>
+        <span class="mps-line"></span>
+      </div>
+      <div class="mps-tick" data-score="1400" style="top: 44.4%;">
+        <span class="mps-num">1400</span>
+        <span class="mps-line"></span>
+      </div>
+      <div class="mps-tick mps-mps" data-score="1600" style="top: 66.7%;">
+        <span class="mps-num">1600</span>
+        <span class="mps-line"></span>
+        <span class="mps-label">MPS</span>
+      </div>
+      <div class="mps-tick" data-score="1800" style="top: 88.9%;">
+        <span class="mps-num">1800</span>
+        <span class="mps-line"></span>
+      </div>
+      <div class="mps-tick mps-tick-bot" data-score="1900" style="top: 100%;">
+        <span class="mps-num">1900</span>
+        <span class="mps-line"></span>
+      </div>
+    </div>
+
+    <div class="mps-track">
+      <div class="mps-track-fill" id="mpsTrackFill"></div>
+    </div>
+
+    <div class="mps-drop" id="mpsDrop">
+      <svg viewBox="0 0 24 32" width="22" height="28" aria-hidden="true">
+        <path d="M12 1 C12 1, 2 16, 2 22 a10 10 0 0 0 20 0 C22 16, 12 1, 12 1 Z"
+              fill="var(--pop)"
+              stroke="rgba(255,255,255,0.4)"
+              stroke-width="0.6"/>
+      </svg>
+      <div class="mps-drop-score">
+        <span class="mps-drop-num" id="mpsDropScore">1000</span>
+        <span class="mps-drop-label">your score</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================
+       MPS POPUP — fires when drop reaches 1600
+       ============================================ -->
+  <div class="mps-popup" id="mpsPopup" role="alert" aria-hidden="true">
+    <button class="mps-popup-close" id="mpsPopupClose" type="button" aria-label="Dismiss">✕</button>
+    <div class="mps-popup-head">
+      <span class="mps-popup-dot"></span>
+      <span class="mps-popup-tag">MPS · 1600 · cleared</span>
+    </div>
+    <h4 class="mps-popup-title">You just passed CFA <span class="mps-popup-hl">in our heads.</span></h4>
+    <p class="mps-popup-body">
+      You've scrolled past the minimum passing score. Now make it real. The free strategy call is the single fastest way to turn this scroll into a 1600+ in November.
+    </p>
+    <a href="#book" class="mps-popup-cta" id="mpsPopupCta">
+      Book the free call
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a href="#top" class="logo">
+      <span class="logo-mark">bc</span>
+      <span class="logo-text">barely chartered</span>
+    </a>
+    <div class="nav-right">
+      <a href="https://www.instagram.com/barely.chartered" target="_blank" rel="noopener" class="nav-ig" aria-label="Open Instagram, @barely.chartered">
+        <span class="ig-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+        </span>
+        <span>@barely.chartered</span>
+      </a>
+      <a href="#book" class="nav-cta magnetic">Book a call</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <h1 class="hero-headline reveal">
+      <span class="line hl-neon">Cleared L1 with 1760.</span>
+      <span class="line">Now I'm the coach</span>
+      <span class="line accent">you couldn't afford.</span>
+    </h1>
+
+    <p class="hero-sub reveal">
+      Cleared it Nov 2025. Now I coach the next batch — and teach it daily, <span class="pop">free.</span>
+    </p>
+
+    <div class="hero-proof reveal">
+      <span class="hp-chip"><b>1760</b><span>my L1 score</span></span>
+      <span class="hp-chip"><b>+160</b><span>over the cutoff</span></span>
+      <span class="hp-chip"><b>Top band</b><span>Nov 2025</span></span>
+    </div>
+
+    <div class="hero-cta reveal">
+      <a href="#book" class="btn btn-primary magnetic">
+        Book a free strategy call
+        <span class="arrow">→</span>
+      </a>
+      <a href="#report" class="btn btn-ghost">
+        See the report card
+      </a>
+    </div>
+  </section>
+
+  <!-- THE MENU — replaces traditional meta strip -->
+  <section class="menu">
+    <div class="menu-card reveal">
+      <div class="menu-head">
+        <div class="menu-title">THE MENU</div>
+        <div class="menu-tag">our price · vs · market average</div>
+      </div>
+      <div class="menu-rule"></div>
+      <ul class="menu-list">
+        <li class="menu-row">
+          <span class="menu-no">01</span>
+          <span class="menu-item">Free strategy call</span>
+          <span class="menu-dots"></span>
+          <span class="menu-old">₹500</span>
+          <span class="menu-arrow">→</span>
+          <span class="menu-new">₹0</span>
+        </li>
+        <li class="menu-row">
+          <span class="menu-no">02</span>
+          <span class="menu-item">Flashnotes bundle (all 10 topics)</span>
+          <span class="menu-dots"></span>
+          <span class="menu-old">₹5,000</span>
+          <span class="menu-arrow">→</span>
+          <span class="menu-new">₹499</span>
+        </li>
+        <li class="menu-row">
+          <span class="menu-no">03</span>
+          <span class="menu-item">Pay per call (20 / 40 min)</span>
+          <span class="menu-dots"></span>
+          <span class="menu-old">₹2,000</span>
+          <span class="menu-arrow">→</span>
+          <span class="menu-new">₹199 / ₹349</span>
+        </li>
+        <li class="menu-row menu-flagship">
+          <span class="menu-no">04</span>
+          <span class="menu-item">Exam Buddy mentorship, till exam day</span>
+          <span class="menu-dots"></span>
+          <span class="menu-old">₹40,000</span>
+          <span class="menu-arrow">→</span>
+          <span class="menu-new">₹1,499</span>
+        </li>
+        <li class="menu-row menu-only">
+          <span class="menu-no">★</span>
+          <span class="menu-item">Refund if you don't clear</span>
+          <span class="menu-dots"></span>
+          <span class="menu-only-tag">first in India</span>
+        </li>
+      </ul>
+      <div class="menu-foot">
+        <span>* market prices estimated across Schweser, FinTree, IFT, AnalystPrep</span>
+        <span>vol. 01 · 2026</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRIDGE — conversational story setup -->
+  <section class="bridge">
+    <p class="bridge-eyebrow reveal">okay, real talk</p>
+    <h2 class="bridge-line reveal">
+      Nobody should be <span class="pop">failing this alone at 11pm,</span> googling the same doubt for the third time.
+    </h2>
+    <p class="bridge-sub reveal">
+      I literally just did this — cleared Level I in November with a 1760. So I'm not here to sell you a ₹40,000 course. I'm just going to show you how I'd crack it if I had to start over. Come scroll with me for a sec.
+    </p>
+    <div class="bridge-scroll reveal" aria-hidden="true">
+      <span class="bridge-mouse"><span></span></span>
+      <span>keep scrolling</span>
+    </div>
+  </section>
+
+  <!-- WHY — newspaper (dark mode, integrated aesthetic) -->
+  <section class="newspaper" id="why">
+    <article class="paper">
+      <div class="paper-masthead">
+        <div class="paper-issue">VOL. 01 · ISSUE 001</div>
+        <h2 class="paper-title">THE PEER PRESS</h2>
+        <div class="paper-date">EST. 2026 · DELHI · ₹0</div>
+      </div>
+
+      <div class="paper-divider"></div>
+
+      <div class="paper-kicker reveal">FIELD REPORT, FROM SOMEONE WHO JUST TOOK THE EXAM</div>
+
+      <h3 class="paper-headline reveal">
+        THE <span class="paper-headline-figure">₹40,000</span> GAP.
+      </h3>
+
+      <p class="paper-dek reveal">
+        Look, right now you've basically got two options. And honestly? Both of them kind of let you down.
+      </p>
+
+      <div class="paper-divider thin"></div>
+
+      <div class="gap-grid">
+        <div class="gap-col reveal">
+          <div class="gap-icon">🎓</div>
+          <div class="gap-price gap-price-red">₹40,000</div>
+          <div class="gap-name">The premium course</div>
+          <div class="gap-note">Overkill. Built for a classroom, not your 11pm tablet.</div>
+        </div>
+        <div class="gap-vs">vs</div>
+        <div class="gap-col reveal">
+          <div class="gap-icon">📁</div>
+          <div class="gap-price gap-price-red">Free-ish</div>
+          <div class="gap-name">Pirated Telegram PDFs</div>
+          <div class="gap-note">Wrong answers, wrong order. Nobody picks up.</div>
+        </div>
+        <div class="gap-vs">vs</div>
+        <div class="gap-col gap-col-us reveal">
+          <div class="gap-icon">✦</div>
+          <div class="gap-price">the middle</div>
+          <div class="gap-name">barely chartered</div>
+          <div class="gap-note">A peer you can call. Free notes. A refund if you fail.</div>
+        </div>
+      </div>
+
+      <div class="paper-footer">
+        <span>Page 01</span>
+        <span>— Chirag, 1760, just cleared L1</span>
+        <span>★ ★ ★</span>
+      </div>
+    </article>
+  </section>
+
+  <!-- RECEIPTS — torchlight, real report card -->
+  <section class="report" id="report">
+    <header class="sec-head reveal">
+      <div class="sec-num">02</div>
+      <div class="sec-bar"></div>
+      <div class="sec-tag">Receipts, not promises</div>
+    </header>
+
+    <h2 class="sec-title reveal">
+      Don't trust me. <span class="accent">Trust the score.</span>
+    </h2>
+    <p class="report-hint reveal">
+      <span class="hint-arrow">↓</span>
+      Move your cursor over the dark. The report reveals where you look.
+    </p>
+
+    <div class="report-stage" id="reportStage">
+      <div class="report-frame">
+        <img src="assets/cfa-report-card.jpg" alt="Chirag Joshi's CFA Level I report card, score 1760, passed November 2025" class="rc-image" loading="lazy" />
+      </div>
+
+      <div class="report-overlay" id="reportOverlay" aria-hidden="true"></div>
+      <div class="torch-pulse" id="torchPulse" aria-hidden="true"></div>
+    </div>
+
+    <div class="report-outro">
+      <p class="reveal">
+        That's <span class="pop">160 marks clear of the line</span>, top band. Same brain, same notes — and I still remember <span class="accent">exactly how I pulled it off</span>. That's what you get to borrow.
+      </p>
+      <a href="#book" class="btn btn-primary magnetic reveal">
+        Book a call with the 1760 scorer
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- TEACH — we actually teach, for free (IG proof) -->
+  <section class="teach" id="teach">
+    <header class="sec-head reveal">
+      <div class="sec-num">03</div>
+      <div class="sec-bar"></div>
+      <div class="sec-tag">The real difference</div>
+    </header>
+
+    <h2 class="sec-title reveal">
+      They sell you a course.<br><span class="accent">I just</span> <span class="pop">teach.</span> <span class="accent">For free.</span>
+    </h2>
+    <p class="teach-sub reveal">
+      Real CFA lessons, every single day, on Instagram. No funnel, no gatekeeping. <span class="ts-strike">every other finfluencer</span> — just proof. ↓
+    </p>
+
+    <div class="ig-wall">
+      <div class="ig-phone reveal">
+        <div class="ig-phone-top">
+          <span class="ig-ava">bc</span>
+          <span class="ig-handle">@barely.chartered</span>
+          <span class="ig-follow-mini">Follow</span>
+        </div>
+        <div class="ig-ph ig-ph-tall">[ profile / reel screenshot ]<small>your @barely.chartered grid or a reel</small></div>
+      </div>
+
+      <div class="ig-col">
+        <div class="ig-ph reveal">[ post 1 ]<small>a teaching carousel (e.g. the 5-mistakes one)</small></div>
+        <div class="ig-ph reveal">[ post 2 ]<small>a concept explained simply</small></div>
+      </div>
+      <div class="ig-col">
+        <div class="ig-ph reveal">[ post 3 ]<small>a 100-day challenge day post</small></div>
+        <div class="ig-ph reveal">[ reel ]<small>a talking reel / whiteboard clip</small></div>
+      </div>
+    </div>
+
+    <div class="ig-bar reveal">
+      <div class="ig-stat"><b data-counter="100">0</b><span>days, teaching live</span></div>
+      <div class="ig-stat-sep"></div>
+      <div class="ig-stat"><b>₹0</b><span>to learn from me</span></div>
+      <div class="ig-stat-sep"></div>
+      <div class="ig-stat"><b>0</b><span>things sold to watch</span></div>
+      <a href="https://www.instagram.com/barely.chartered" target="_blank" rel="noopener" class="btn btn-primary magnetic ig-bar-cta">
+        Follow @barely.chartered
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ASPIRATION — envelope animation -->
+  <section class="aspiration">
+    <header class="sec-head reveal">
+      <div class="sec-num">03</div>
+      <div class="sec-bar"></div>
+      <div class="sec-tag">What success looks like</div>
+    </header>
+
+    <div class="aspiration-inner">
+      <div class="aspiration-text">
+        <h2 class="sec-title reveal">
+          One email. <span class="accent">Two years of work.</span>
+        </h2>
+        <p class="aspiration-body reveal">
+          This is the email CFA Institute sends on results day. Mine arrived on a Tuesday morning. Subject line: <span class="quote">"Your CFA® Program Level I Results."</span>
+        </p>
+        <p class="aspiration-body reveal">
+          On results day in <span class="accent">your year</span>, that same email lands in your inbox. What's inside it depends on what you do over the next 12 months.
+        </p>
+        <div class="aspiration-tag reveal">
+          <span class="dot"></span>
+          <span>Real inbox, November 2025</span>
+        </div>
+      </div>
+
+      <!-- ENVELOPE -->
+      <div class="aspiration-frame reveal">
+        <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Click to open the CFA Institute results email">
+          <!-- closed state -->
+          <div class="env-flap" aria-hidden="true">
+            <div class="env-seal">⊕</div>
+          </div>
+          <div class="env-body">
+            <div class="env-stamp" aria-hidden="true">
+              <span>CFA</span>
+              <span class="env-stamp-sub">NOV · 2025</span>
+            </div>
+            <div class="env-address">
+              <div class="env-label">FROM</div>
+              <div class="env-name">CFA Institute, Charlottesville VA</div>
+              <div class="env-line"></div>
+              <div class="env-label">TO</div>
+              <div class="env-name">Chirag Joshi</div>
+              <div class="env-re">RE: Your November 2025 Level I Results</div>
+            </div>
+            <div class="env-cta-row">
+              <button class="env-cta" type="button">click to open ↑</button>
+              <span class="env-hint">first-class · expedited</span>
+            </div>
+          </div>
+
+          <!-- opened state -->
+          <div class="env-opened" aria-hidden="true">
+            <img src="assets/cfa-results-email.png" alt="CFA Institute Level I results email, Chirag passed November 2025" class="email-image" loading="lazy" />
+            <button class="env-close" type="button" aria-label="Close envelope">✕ close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="products" id="products">
+    <header class="sec-head reveal">
+      <div class="sec-num">04</div>
+      <div class="sec-bar"></div>
+      <div class="sec-tag">What you can buy</div>
+    </header>
+
+    <h2 class="sec-title reveal">
+      Four products. <span class="accent">All priced for a student wallet.</span>
+    </h2>
+
+    <div class="product-grid">
+
+      <article class="product-card flagship tilt reveal">
+        <div class="flagship-ribbon">★ Flagship, refund-backed</div>
+        <div class="flagship-header">
+          <div class="flagship-tag">valid till your exam date</div>
+          <div class="flagship-price"><span class="flagship-price-num">₹1,499</span></div>
+        </div>
+        <h3 class="flagship-title">exam<br>buddy</h3>
+        <p class="flagship-desc">A call every 15 days till exam day. WhatsApp access for the panic moments. And one thing nobody else gives you.</p>
+        <div class="flagship-promise">
+          <span class="promise-icon">⌃</span>
+          <div>
+            <div class="promise-title">Money back if you fail</div>
+            <div class="promise-fine">condition: 80%+ call attendance</div>
+          </div>
+        </div>
+        <ul class="flagship-list">
+          <li><span>01</span> Call every 15 days, 30 min each</li>
+          <li><span>02</span> Direct WhatsApp doubt access</li>
+          <li><span>03</span> Last-30-day exam playbook</li>
+          <li><span>04</span> Conditional fail-refund</li>
+        </ul>
+        <a href="#book" class="flagship-cta">
+          Become a buddy
+          <span class="arrow">→</span>
+        </a>
+      </article>
+
+      <article class="mini-card tilt reveal">
+        <div class="mini-top">
+          <div class="mini-tag">free, once per person</div>
+          <div class="mini-price">₹0</div>
+        </div>
+        <div class="mini-mid">
+          <h4 class="mini-title">Free strategy call</h4>
+          <p class="mini-desc">20 min. Weak-topic audit, 30-day plan, honest read. Zero pitch.</p>
+        </div>
+        <a href="#book" class="mini-cta">Book your slot →</a>
+      </article>
+
+      <article class="mini-card tilt reveal">
+        <div class="mini-top">
+          <div class="mini-tag">bestseller, lifetime</div>
+          <div class="mini-price">₹499</div>
+        </div>
+        <div class="mini-mid">
+          <h4 class="mini-title">Flashnotes bundle</h4>
+          <p class="mini-desc">10 topics, every formula that matters. Printable and tablet-friendly.</p>
+        </div>
+        <a href="#book" class="mini-cta">Get the bundle →</a>
+      </article>
+
+      <article class="mini-card tilt reveal">
+        <div class="mini-top">
+          <div class="mini-tag">pay as you go</div>
+          <div class="mini-price">₹199 <span class="mini-alt">/ ₹349</span></div>
+        </div>
+        <div class="mini-mid">
+          <h4 class="mini-title">Pay per call</h4>
+          <p class="mini-desc">20 min for ₹199, 40 min for ₹349. One doubt, one mock review, done.</p>
+        </div>
+        <a href="#book" class="mini-cta">Pick a slot →</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- LEAD MAGNET -->
+  <section class="leadmagnet" id="tracker">
+    <header class="sec-head reveal">
+      <div class="sec-num">05</div>
+      <div class="sec-bar"></div>
+      <div class="sec-tag">Free download</div>
+    </header>
+
+    <div class="lm-inner">
+      <div class="lm-left reveal">
+        <h2 class="sec-title">
+          The <span class="accent">90-day L1 tracker</span> I actually used.
+        </h2>
+        <p class="lm-sub">
+          The topic-by-topic plan, mock checkpoints, and the week-by-week load that got me to 1760. PDF. Drops in your inbox. No daily marketing.
+        </p>
+      </div>
+      <form class="lm-form reveal" id="trackerForm" novalidate>
+        <label for="lm-email">your email</label>
+        <input type="email" id="lm-email" name="email" placeholder="you@studyhard.com" required autocomplete="email" />
+        <button type="submit" class="btn btn-primary magnetic">
+          Send me the tracker
+          <span class="arrow">→</span>
+        </button>
+        <p class="form-note">one email. lands in 2 minutes.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- BOOK -->
+  <section class="book" id="book">
+    <header class="sec-head reveal">
+      <div class="sec-num">06</div>
+      <div class="sec-bar"></div>
+      <div class="sec-tag">Let's talk</div>
+    </header>
+
+    <div class="book-inner">
+      <h2 class="sec-title reveal">
+        Book a <span class="accent">free 20-min</span> call.
+      </h2>
+      <p class="book-sub reveal">
+        Tell me where you are. I'll come back with a plan and a slot within 24 hours.
+      </p>
+
+      <form class="book-form reveal" id="bookForm" novalidate>
+        <div class="form-row">
+          <div class="form-field"><label for="bk-name">your name</label><input type="text" id="bk-name" name="name" required autocomplete="name" /></div>
+          <div class="form-field"><label for="bk-email">email</label><input type="email" id="bk-email" name="email" required autocomplete="email" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label for="bk-phone">whatsapp number</label><input type="tel" id="bk-phone" name="phone" placeholder="+91" required autocomplete="tel" /></div>
+          <div class="form-field"><label for="bk-attempt">exam attempt</label>
+            <select id="bk-attempt" name="attempt" required>
+              <option value="">pick one</option><option>Feb 2027</option><option>May 2027</option>
+              <option>Aug 2027</option><option>Nov 2027</option><option>Already attempted, retaking</option><option>Just exploring</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field full"><label for="bk-topic">where are you in your prep?</label>
+            <select id="bk-topic" name="topic" required>
+              <option value="">pick one</option><option>Not started yet</option><option>Ethics</option>
+              <option>Quants</option><option>Economics</option><option>FRA</option><option>Corporate Issuers</option>
+              <option>Equity</option><option>Fixed Income</option><option>Derivatives</option>
+              <option>Alternative Investments</option><option>Portfolio Management</option><option>Done with material, in revision</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field full"><label for="bk-blocker">your biggest blocker right now</label>
+            <textarea id="bk-blocker" name="blocker" rows="2" placeholder="one line is enough: 'don't know where to start', 'failing mocks at 50%', 'can't manage with job'" required></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-large magnetic">
+          Send. Reply in 24 hours.
+          <span class="arrow">→</span>
+        </button>
+        <p class="form-note">only Chirag sees this. nobody else.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- FAQ as DMs -->
+  <section class="dm-faq">
+    <header class="sec-head reveal">
+      <div class="sec-num">07</div>
+      <div class="sec-bar"></div>
+      <div class="sec-tag">DMs we get every week</div>
+    </header>
+
+    <h2 class="sec-title reveal">
+      The questions you'd ask <span class="accent">if we were already friends.</span>
+    </h2>
+
+    <div class="dm-window reveal">
+      <div class="dm-header">
+        <div class="dm-avatar">
+          <span>bc</span>
+          <div class="dm-online" aria-hidden="true"></div>
+        </div>
+        <div class="dm-info">
+          <div class="dm-name">barely chartered</div>
+          <div class="dm-status">replies within an hour</div>
+        </div>
+        <div class="dm-icons" aria-hidden="true"><span>⌕</span><span>⋮</span></div>
+      </div>
+
+      <div class="dm-feed">
+        <div class="dm-day">today</div>
+
+        <div class="dm-msg dm-them reveal">
+          <p>wait is this actually run by a cfa candidate??</p>
+          <span class="dm-time">10:42</span>
+        </div>
+        <div class="dm-msg dm-us reveal">
+          <p>yes, and there's a report card to prove it. I cleared L1 in Nov 2025 with 1760 (passing was 1600). Giving L2 now. every note and call comes from someone who just walked the exact path you're on.</p>
+          <span class="dm-time">10:43 ✓✓</span>
+        </div>
+
+        <div class="dm-msg dm-them reveal">
+          <p>okay but how does the refund actually work on the ₹1,499 thing?</p>
+          <span class="dm-time">10:44</span>
+        </div>
+        <div class="dm-msg dm-us reveal">
+          <p>simple rule. if you don't clear L1, we refund the full ₹1,499. on one condition: you showed up for 80%+ of the scheduled calls. we're betting you'll show up, you're betting we'll be useful.</p>
+          <span class="dm-time">10:45 ✓✓</span>
+        </div>
+
+        <div class="dm-msg dm-them reveal">
+          <p>are the flashnotes good for both 2027 and 2028 attempts??</p>
+          <span class="dm-time">10:47</span>
+        </div>
+        <div class="dm-msg dm-us reveal">
+          <p>yep. curriculum changes are minor year on year. any updates we make are pushed to your account automatically, no extra cost.</p>
+          <span class="dm-time">10:47 ✓✓</span>
+        </div>
+
+        <div class="dm-msg dm-them reveal">
+          <p>upi works?</p>
+          <span class="dm-time">10:49</span>
+        </div>
+        <div class="dm-msg dm-us reveal">
+          <p>UPI, cards, netbanking, wallets. anything Razorpay supports. most students pay in 10 seconds via UPI.</p>
+          <span class="dm-time">10:49 ✓✓</span>
+        </div>
+
+        <div class="dm-msg dm-them reveal">
+          <p>why should i trust this over schweser / fintree / IFT</p>
+          <span class="dm-time">10:52</span>
+        </div>
+        <div class="dm-msg dm-us reveal">
+          <p>you shouldn't replace them with us. use their content, use our person. the big players sell videos and books. we sell a student you can call, 15-min revision sheets, and accountability till exam day, for the price of one Schweser book.</p>
+          <span class="dm-time">10:53 ✓✓</span>
+        </div>
+
+        <div class="dm-input reveal">
+          <span class="dm-input-text">type your question →</span>
+          <a href="#book" class="dm-input-send">Ask on a call</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSER -->
+  <section class="closer">
+    <h2 class="closer-headline reveal">
+      Worst case, <span class="accent">you waste 20 minutes</span> on a free call.
+    </h2>
+    <p class="closer-sub reveal">Best case, you clear L1. Like I did.</p>
+    <a href="#book" class="btn btn-primary btn-large magnetic reveal">
+      Book the free call
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-left">
+      <div class="logo-mark big">bc</div>
+      <div class="footer-tag">
+        <span>barely chartered, 2026</span>
+        <span class="footer-sub">built by Chirag, cleared L1 Nov 2025</span>
+      </div>
+    </div>
+    <div class="footer-right">
+      <a href="https://www.instagram.com/barely.chartered" target="_blank" rel="noopener">Instagram</a>
+      <a href="mailto:hello@barelychartered.com">Email</a>
+      <a href="#tracker">Free tracker</a>
+      <a href="#book">Book a call</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
